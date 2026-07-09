@@ -226,11 +226,60 @@ file text
 - **v2 (paid):** LLM-assisted "deep analysis / explain / autofix"; whole-program
   cross-module data-flow ("deep mode"); optional schema-aware checks (real index
   detection, pool-size-aware fan-out) via a connected schema/config source.
+- **v2 — Business-context / data-profile-aware suggestions (see §11):**
+  user-declared facts about their data (table cardinalities, hot/active subset
+  ratios, read/write frequency) that turn generic rules into personalized advice.
 - **Later:** additional language rule packs on the same core; community rule packs.
 
 ---
 
-## 11. Open questions (for spec review)
+## 11. v2 feature: business-context / data-profile awareness
+
+**Motivation.** Many findings are only correct *given the data shape*. Example
+(real, from the RDS backend): a `users` table has ~10k rows but only ~20 are active
+(`archived = false`). Without that fact, a full-collection scan looks alarming and a
+cache looks helpful. *With* it, the scan over the ~20 active rows is cheap and a cache
+on that tiny hot set is pointless (or actively wrong). Generic static rules can't know
+this — the business context has to come from the user.
+
+**Idea.** Let the user declare a lightweight **data profile** (no DB connection
+required — a declared alternative to live schema introspection). Illustrative shape:
+
+```yaml
+# queryguard.data-profile.yaml
+tables:
+  users:
+    rows: ~10000
+    activeSubset: { filter: "roles.archived == false", rows: ~20 }
+    access: read-heavy
+    growth: slow
+```
+
+**What it unlocks (context-aware advice, not just pattern flags):**
+- Downgrade/suppress a "full scan" or "unbounded fan-out" finding when the *effective*
+  working set is tiny (active-subset rows), and instead suggest **active-subset-first
+  filtering** on the large table.
+- Cache advice weighted by size × hotness (tiny+hot vs huge+cold → opposite recommendations).
+- Index suggestions weighted by declared cardinality.
+- Fan-out / pool warnings scaled to declared row counts ("this Promise.all over ~10k
+  rows will exhaust the pool; over ~20 it's fine").
+
+**Relationship to existing tiers.** This is a *user-declared* form of the tier-3
+"project-specific" facts §2 deferred — trading live DB introspection for a small
+declarative file. It layers on top of the v1 rule engine: rules gain an optional
+`dataProfile` input and may adjust severity or message when it's present.
+
+**Open design questions (to resolve when v2 is scoped):**
+- Capture ergonomics: declarative config file (default) vs. model annotations/JSDoc
+  vs. inferred from migrations/schema.
+- How the profile maps a declared `filter` to actual query nodes (matching
+  `where archived == false` in code to the declared active subset).
+- Free vs paid: this personalization is a strong paid-tier candidate.
+- Trust/staleness: declared numbers drift from reality; how/whether to warn.
+
+---
+
+## 12. Open questions (for spec review)
 - Final product name (QueryGuard is a placeholder).
 - Monorepo tooling choice (pnpm workspaces + Turborepo vs Nx) — implementation detail,
   decide in the plan.
