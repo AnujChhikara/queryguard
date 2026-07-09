@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "engines": { "node": ">=18" },
   "scripts": {
-    "test": "pnpm -r test",
+    "test": "pnpm -r build && pnpm -r test",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck"
   },
