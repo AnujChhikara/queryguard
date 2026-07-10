@@ -7,3 +7,4 @@ export * from "./adapters/heuristic.js";
 export * from "./rules/n-plus-one.js";
 export * from "./rules/unbounded-read.js";
 export * from "./engine.js";
+export * from "./knowledge/load.js";
