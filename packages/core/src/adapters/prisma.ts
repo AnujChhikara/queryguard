@@ -16,6 +16,30 @@ function operationFor(method: string): QueryDescriptor["operation"] {
 
 const ALL_METHODS = new Set([...READ_METHODS, ...WRITE_METHODS, ...DELETE_METHODS]);
 
+function readOptions(call: CallExpression): {
+  hasLimit: boolean;
+  hasFilter: boolean;
+  selectedFields: string[];
+} {
+  const [firstArg] = call.getArguments();
+  if (!firstArg || !Node.isObjectLiteralExpression(firstArg)) {
+    return { hasLimit: false, hasFilter: false, selectedFields: [] };
+  }
+  const hasProp = (name: string) => Boolean(firstArg.getProperty(name));
+  const selectProp = firstArg.getProperty("select");
+  let selectedFields: string[] = [];
+  if (selectProp && Node.isPropertyAssignment(selectProp)) {
+    const init = selectProp.getInitializer();
+    if (init && Node.isObjectLiteralExpression(init)) {
+      selectedFields = init
+        .getProperties()
+        .filter(Node.isPropertyAssignment)
+        .map((p) => p.getName());
+    }
+  }
+  return { hasLimit: hasProp("take"), hasFilter: hasProp("where"), selectedFields };
+}
+
 export function prismaAdapter(call: CallExpression): QueryDescriptor | null {
   const expr = call.getExpression();
   // Expect: <base>.<model>.<method>
@@ -32,6 +56,8 @@ export function prismaAdapter(call: CallExpression): QueryDescriptor | null {
 
   const isAwaited = Boolean(call.getFirstAncestor((a) => Node.isAwaitExpression(a)));
 
+  const options = readOptions(call);
+
   return {
     db: "postgres",
     orm: "prisma",
@@ -40,5 +66,9 @@ export function prismaAdapter(call: CallExpression): QueryDescriptor | null {
     node: call,
     inLoop: isInsideLoop(call),
     awaited: isAwaited,
+    confidence: "high",
+    hasLimit: options.hasLimit,
+    hasFilter: options.hasFilter,
+    selectedFields: options.selectedFields,
   };
 }

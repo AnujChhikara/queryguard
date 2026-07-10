@@ -23,9 +23,12 @@ export interface QueryDescriptor {
   operation: "read" | "write" | "delete" | "unknown";
   target: string;
   selectedFields?: string[];
+  hasLimit?: boolean;
+  hasFilter?: boolean;
   node: Node;
   inLoop: boolean;
   awaited: boolean;
+  confidence: "high" | "heuristic";
 }
 
 export interface RuleContext {

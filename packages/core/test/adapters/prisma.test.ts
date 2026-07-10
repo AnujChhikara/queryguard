@@ -32,4 +32,26 @@ describe("prismaAdapter", () => {
     const call = firstCall(`async function r(prisma){ await prisma.findMany(); }`, "prisma.findMany");
     expect(prismaAdapter(call)).toBeNull();
   });
+
+  it("marks prisma descriptors as high confidence", () => {
+    const call = firstCall(`async function r(prisma){ await prisma.user.findMany(); }`, "prisma.user.findMany");
+    expect(prismaAdapter(call)!.confidence).toBe("high");
+  });
+
+  it("detects presence of where (hasFilter) and take (hasLimit)", () => {
+    const withBoth = firstCall(`async function r(prisma){ await prisma.user.findMany({ where: { id: 1 }, take: 10 }); }`, "prisma.user.findMany");
+    const d1 = prismaAdapter(withBoth)!;
+    expect(d1.hasFilter).toBe(true);
+    expect(d1.hasLimit).toBe(true);
+
+    const withNeither = firstCall(`async function r(prisma){ await prisma.user.findMany(); }`, "prisma.user.findMany");
+    const d2 = prismaAdapter(withNeither)!;
+    expect(d2.hasFilter).toBe(false);
+    expect(d2.hasLimit).toBe(false);
+  });
+
+  it("collects selected fields from a select object", () => {
+    const call = firstCall(`async function r(prisma){ await prisma.user.findMany({ select: { id: true, name: true } }); }`, "prisma.user.findMany");
+    expect(prismaAdapter(call)!.selectedFields).toEqual(["id", "name"]);
+  });
 });
