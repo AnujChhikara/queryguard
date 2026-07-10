@@ -29,6 +29,13 @@ describe("analyzeSource", () => {
     expect(() => analyzeSource("const x = ")).not.toThrow();
   });
 
+  it("warns unbounded-read on a filterless, limitless prisma read", () => {
+    const diags = analyzeSource(`async function all(prisma){ return prisma.user.findMany(); }`);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].ruleId).toBe("unbounded-read");
+    expect(diags[0].severity).toBe("warning");
+  });
+
   it("warns on a no-ORM query in a loop (heuristic)", () => {
     const diags = analyzeSource(`
       async function getAll(items) {
