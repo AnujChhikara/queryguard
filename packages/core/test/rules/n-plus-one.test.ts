@@ -46,4 +46,12 @@ describe("nPlusOneRule", () => {
     const ctx = { descriptors: descriptors(`async function r(prisma, ids){ for (const id of ids){ await prisma.user.findUnique({ where: { id } }); } }`) };
     expect(nPlusOneRule.match(ctx)[0].severity).toBe("error");
   });
+
+  it("flags prisma.user.count() inside a loop as n-plus-one error (aggregate stays a read)", () => {
+    const ctx = { descriptors: descriptors(`async function r(prisma, items){ for (const item of items){ await prisma.user.count({ where: { orgId: item.id } }); } }`) };
+    const diags = nPlusOneRule.match(ctx);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].ruleId).toBe("n-plus-one");
+    expect(diags[0].severity).toBe("error");
+  });
 });

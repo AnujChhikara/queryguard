@@ -46,4 +46,19 @@ describe("unboundedReadRule", () => {
     const ctx = { descriptors: prismaDescriptors(`async function r(prisma){ await prisma.user.create({ data: {} }); }`) };
     expect(unboundedReadRule.match(ctx)).toHaveLength(0);
   });
+
+  it("does NOT warn on prisma.user.count() — aggregate, no filter/limit is not an unbounded read", () => {
+    const ctx = { descriptors: prismaDescriptors(`async function r(prisma){ await prisma.user.count(); }`) };
+    expect(unboundedReadRule.match(ctx)).toHaveLength(0);
+  });
+
+  it("does NOT warn on prisma.user.aggregate() — aggregate call", () => {
+    const ctx = { descriptors: prismaDescriptors(`async function r(prisma){ await prisma.user.aggregate({ _count: true }); }`) };
+    expect(unboundedReadRule.match(ctx)).toHaveLength(0);
+  });
+
+  it("does NOT warn on prisma.user.groupBy() — aggregate call", () => {
+    const ctx = { descriptors: prismaDescriptors(`async function r(prisma){ await prisma.user.groupBy({ by: ["role"] }); }`) };
+    expect(unboundedReadRule.match(ctx)).toHaveLength(0);
+  });
 });

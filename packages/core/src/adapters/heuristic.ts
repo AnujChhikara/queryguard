@@ -58,5 +58,6 @@ export function heuristicAdapter(call: CallExpression): QueryDescriptor | null {
     selectedFields: undefined,
     hasLimit: undefined,
     hasFilter: undefined,
+    isAggregate: undefined,
   };
 }

@@ -9,6 +9,7 @@ export const unboundedReadRule: Rule = {
       .filter(
         (d) =>
           d.operation === "read" &&
+          d.isAggregate !== true &&
           d.hasFilter === false &&
           d.hasLimit === false,
       )

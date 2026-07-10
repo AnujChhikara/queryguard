@@ -25,6 +25,7 @@ export interface QueryDescriptor {
   selectedFields?: string[];
   hasLimit?: boolean;
   hasFilter?: boolean;
+  isAggregate?: boolean;
   node: Node;
   inLoop: boolean;
   awaited: boolean;

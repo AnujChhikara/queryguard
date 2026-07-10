@@ -6,6 +6,7 @@ import { isInsideLoop } from "../loop.js";
 const READ_METHODS = new Set(["findMany", "findFirst", "findUnique", "findUniqueOrThrow", "findFirstOrThrow", "count", "aggregate", "groupBy"]);
 const WRITE_METHODS = new Set(["create", "createMany", "update", "updateMany", "upsert"]);
 const DELETE_METHODS = new Set(["delete", "deleteMany"]);
+const AGGREGATE_METHODS = new Set(["count", "aggregate", "groupBy"]);
 
 function operationFor(method: string): QueryDescriptor["operation"] {
   if (READ_METHODS.has(method)) return "read";
@@ -70,5 +71,6 @@ export function prismaAdapter(call: CallExpression): QueryDescriptor | null {
     hasLimit: options.hasLimit,
     hasFilter: options.hasFilter,
     selectedFields: options.selectedFields,
+    isAggregate: AGGREGATE_METHODS.has(method),
   };
 }
