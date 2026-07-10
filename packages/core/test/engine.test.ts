@@ -28,4 +28,18 @@ describe("analyzeSource", () => {
   it("does not throw on unparsable input", () => {
     expect(() => analyzeSource("const x = ")).not.toThrow();
   });
+
+  it("warns on a no-ORM query in a loop (heuristic)", () => {
+    const diags = analyzeSource(`
+      async function getAll(items) {
+        await Promise.all(items.map(async (i) => {
+          const u = await dataAccess.retrieveUsers({ id: i.id });
+          return u;
+        }));
+      }
+    `);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].ruleId).toBe("n-plus-one");
+    expect(diags[0].severity).toBe("warning");
+  });
 });
