@@ -16,6 +16,7 @@ describe("heuristicAdapter", () => {
     expect(d!.operation).toBe("unknown");
     expect(d!.hasLimit).toBeUndefined();
     expect(d!.hasFilter).toBeUndefined();
+    expect(d!.selectedFields).toBeUndefined();
   });
 
   it("recognizes an awaited call on a data-source receiver (mongoose find)", () => {
@@ -36,6 +37,11 @@ describe("heuristicAdapter", () => {
 
   it("does NOT recognize a bare function call (no property access)", () => {
     const call = firstCall(`async function r(){ await getUser(1); }`, "getUser");
+    expect(heuristicAdapter(call)).toBeNull();
+  });
+
+  it("does NOT recognize .then() even if awaited", () => {
+    const call = firstCall(`async function r(p){ await p.then(() => 1); }`, "p.then");
     expect(heuristicAdapter(call)).toBeNull();
   });
 });
