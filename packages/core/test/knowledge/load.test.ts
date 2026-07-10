@@ -45,4 +45,21 @@ suppressions:
     expect(parseKnowledge(`: : :`, "/p")).toBeNull();
     expect(parseKnowledge(`version: 1`, "/p")).toBeNull(); // missing tables
   });
+
+  it("filters suppressions to only valid entries and rejects array-valued tables", () => {
+    const k = parseKnowledge(
+      `version: 1
+tables: {}
+suppressions:
+  - 42
+  - { rule: "n-plus-one" }
+  - { rule: "over-fetch", file: "src/x.ts", fn: "run", anchor: "db.q()" }
+`,
+      "/p",
+    )!;
+    expect(k.suppressions).toHaveLength(1);
+    expect(k.suppressions[0].rule).toBe("over-fetch");
+
+    expect(parseKnowledge("version: 1\ntables: []", "/p")).toBeNull();
+  });
 });

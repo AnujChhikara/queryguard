@@ -19,7 +19,7 @@ export function parseKnowledge(text: string, baseDir: string): Knowledge | null 
   if (typeof raw !== "object" || raw === null) return null;
   const obj = raw as Record<string, unknown>;
   if (obj.version !== 1) return null;
-  if (typeof obj.tables !== "object" || obj.tables === null) return null;
+  if (typeof obj.tables !== "object" || obj.tables === null || Array.isArray(obj.tables)) return null;
 
   const th = (obj.thresholds ?? {}) as Partial<Thresholds>;
   const thresholds: Thresholds = {
@@ -28,7 +28,14 @@ export function parseKnowledge(text: string, baseDir: string): Knowledge | null 
   };
 
   const suppressions = Array.isArray(obj.suppressions)
-    ? (obj.suppressions as Knowledge["suppressions"])
+    ? (obj.suppressions as unknown[]).filter(
+        (s): s is Knowledge["suppressions"][number] =>
+          typeof s === "object" && s !== null &&
+          typeof (s as Record<string, unknown>).rule === "string" &&
+          typeof (s as Record<string, unknown>).file === "string" &&
+          typeof (s as Record<string, unknown>).fn === "string" &&
+          typeof (s as Record<string, unknown>).anchor === "string",
+      )
     : [];
 
   return {
