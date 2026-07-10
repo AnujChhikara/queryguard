@@ -58,6 +58,11 @@ case falls back to today's exact behavior.
      table with a known highly-selective filter.
 - **Inline hints** as the explicit fallback: `// queryguard: bounded [n]` /
   `// queryguard: unbounded`.
+- A **suppression mechanism** (§11): an interactive `queryguard suppress
+  <file>:<line>` command that silences *any* diagnostic (warning or error),
+  records a precise, line-drift-resilient suppression plus an optional reason into
+  the knowledge file, and offers to promote an implied cardinality fact (never
+  automatically). The analysis engine honors recorded suppressions.
 - Positive + negative fixtures per behavior; a `docs/database-knowledge/` note for
   the knowledge-file format and the `over-fetch` rule.
 
@@ -70,6 +75,9 @@ case falls back to today's exact behavior.
   rest is handled by inline hints.
 - **LLM-assisted authoring** of the knowledge file (prose → structured facts).
   Possible later phase; does not affect the static analysis path.
+- **Interactive suppression inside the VS Code extension** (a "suppress + why?"
+  quick-fix). v1 ships the interactive flow in the **CLI** (`queryguard suppress`);
+  the editor quick-fix reuses the same storage + engine plumbing in a later phase.
 - Adapters for other ORMs. The knowledge model is ORM-agnostic (keyed by table +
   predicate), but v1 wires predicate extraction into the **Prisma adapter only**;
   the heuristic adapter continues to emit `unknown` cardinality.
@@ -259,10 +267,11 @@ export function discoverKnowledge(fromPath: string): Knowledge | null;
 ```
 
 `analyzeSource` builds descriptors as today, then computes the `cardinalityOf` /
-`loopBoundOf` maps (applying inline-hint overrides), then runs rules over the
-enriched `RuleContext`. The `knowledge` argument defaults to `null`; with no
-knowledge and no hints, every bound is `unknown` and output is **byte-identical to
-today**.
+`loopBoundOf` maps (applying inline-hint overrides), runs rules over the enriched
+`RuleContext`, and finally **drops any diagnostic matched by a recorded suppression**
+(§11) before returning. The `knowledge` argument defaults to `null`; with no
+knowledge, no hints, and no suppressions, every bound is `unknown` and output is
+**byte-identical to today**.
 
 The **CLI** calls `discoverKnowledge(cwd)` once, then passes the result to every
 `analyzeSource` call. A `--knowledge <path>` flag overrides discovery; `--no-knowledge`
@@ -284,6 +293,10 @@ Per module, following the existing fixture style:
 - **Rules:** `n-plus-one` small→suppressed / large→escalated / unknown→unchanged;
   `over-fetch` fires only with knowledge + selective filter, never on aggregates.
 - **Inline hints:** `bounded` / `bounded n` / `unbounded` override inference.
+- **Suppression (§11):** anchor matching survives line shifts above the call;
+  a changed call excerpt lapses the suppression; a matching suppression drops the
+  diagnostic; suppress-command writes a well-formed entry and (on confirm) a fact;
+  `--reason`/`--yes` run non-interactively.
 - **Regression:** with **no** knowledge file, the full existing suite passes
   unchanged (the identity guarantee from §8).
 
@@ -299,3 +312,64 @@ Per module, following the existing fixture style:
 | `small` / `large` thresholds | Defaults **50 / 1000**, overridable in the knowledge file. |
 | `over-fetch` placement | **New rule**, not folded into `unbounded-read`. |
 | `small`-bound N+1 | **Suppress**, not downgrade to `info`. |
+| Suppression surface | **Interactive `queryguard suppress` CLI command** (VS Code quick-fix deferred). |
+| Suppression storage | **In the knowledge file**, anchored by rule + file + call excerpt (not raw line). |
+| Learn-from-reason | **Log the site + suggest a fact on confirm** — never auto-promote. |
+
+---
+
+## 11. Suppression & the learn loop
+
+Every diagnostic — `warning` or `error` — can be suppressed. Suppression is a
+blunter tool than the §7 bound hints: it fully silences one specific diagnostic,
+whereas hints only adjust a cardinality bound.
+
+### 11a. Storage model
+
+Suppressions live in the knowledge file (one source of truth) under `suppressions`:
+
+```yaml
+suppressions:
+  - rule: n-plus-one
+    file: src/contacts.ts
+    fn: syncContacts          # enclosing function name (or "<module>")
+    anchor: "prisma.contact.findMany(...)"   # normalized call excerpt
+    reason: "contacts are bounded to active users (~10)"
+    added: 2026-07-10
+```
+
+**Matching is line-independent.** A diagnostic is suppressed when its `rule`,
+`file`, enclosing `fn`, and normalized call **anchor** all match an entry. Raw line
+numbers are never used for matching, so inserting code above the call does **not**
+un-silence it. If the call's own text changes materially, the anchor stops matching
+and the suppression **lapses** — the diagnostic returns for re-evaluation, which is
+the desired behavior (the code the user vouched for is no longer the code running).
+
+### 11b. The `queryguard suppress` command
+
+```
+queryguard suppress <file>:<line> [--rule <id>] [--reason "<text>"] [--yes]
+```
+
+Interactive flow:
+1. Analyze `<file>`; collect diagnostics whose range covers `<line>`. Zero → error
+   ("no diagnostic there"). More than one → list them and require `--rule` (or
+   prompt to pick).
+2. Prompt `why are you suppressing this? (optional — Enter to skip)`.
+3. Append a `suppressions[]` entry (rule, file, fn, anchor, reason, date) to the
+   knowledge file, creating the file if absent.
+4. **Suggest-a-fact:** if the resolved cardinality context implies a general fact
+   (e.g. the driving table looks bounded), print the suggested `tables.*` entry and
+   prompt `also record this as a fact? [y/N]`. Only on `y` is it merged into
+   `tables`. This is the **only** path from a suppression to a general fact, and it
+   is always an explicit confirm — auto-promotion was declined (precision-first).
+
+Non-interactive: `--reason` supplies the text and `--yes` accepts the fact
+suggestion without prompting, so the command is scriptable (and reusable by the
+future VS Code quick-fix, which drives the same code path).
+
+### 11c. Reversibility
+
+A suppression is just a list entry — deleting it (or letting its anchor lapse)
+restores the diagnostic. There is no hidden state. This keeps the mechanism honest:
+silence is always visible, attributable (the `reason`), and revocable.
