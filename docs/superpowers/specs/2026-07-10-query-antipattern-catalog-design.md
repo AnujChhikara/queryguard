@@ -39,15 +39,23 @@ confidence-tagged warnings.
   - A **rule registry** (formalize the existing `rules[]` seam so each rule is an
     independent, registered consumer).
   - A **heuristic fallback adapter** for no-ORM / custom data-access code.
-- **Rules (4):**
+- **Rules (2):**
   - `query-in-loop` (N+1 family — reads *and* writes in loops).
-  - `over-fetch` (read with no field projection).
-  - `missing-limit` (read with no limit).
-  - `missing-filter` (read with no filter / full scan).
+  - `unbounded-read` (read with **neither** a filter **nor** a limit — a
+    full-scan-no-limit; high-signal because it requires *both* clauses absent).
 - Positive + negative fixtures per rule; a `docs/database-knowledge/` entry per
   rule (fleshes the adjacent-anti-pattern stubs already left in `prisma.md`).
 
 ### Out of scope (explicit follow-ups)
+- **`over-fetch` as its own rule.** A purely syntactic trigger ("read has no
+  `select`") is too noisy — most reads legitimately omit `select`. A precise
+  version needs data-flow (is the fetched row actually used narrowly?) or config.
+  Deferred to a follow-up. `selectedFields` stays on the descriptor for it.
+- **Separate `missing-limit` / `missing-filter` rules.** Firing on the mere
+  absence of one clause flags legitimate queries (a `findUnique` by id has a
+  filter but no limit; a small-table `findMany` has neither by design). They are
+  replaced here by the single, higher-signal `unbounded-read` (both clauses
+  absent). Splitting them out again, if ever, belongs with data-flow/config.
 - Adapters for other ORMs (Mongoose, Drizzle, Sequelize, TypeORM, Knex). The
   architecture is built for them; this slice ships **Prisma + heuristic** only.
 - A `queryguard.config` file to promote heuristic warnings to errors or
@@ -146,25 +154,26 @@ double-count).
   no-ORM case).
 - Message names the operation and target and suggests batching.
 
-### 5.2 `over-fetch`, `missing-limit`, `missing-filter` — precise-adapter descriptors only
-- Each fires **only when the relevant field is known** (`false`), never when
-  `undefined`:
-  - `over-fetch`: `operation === "read"` and `selectedFields` is defined and empty.
-  - `missing-limit`: `operation === "read"` and `hasLimit === false`.
-  - `missing-filter`: `operation === "read"` and `hasFilter === false`.
-- Severity: **warning** (these are lower-confidence, legitimately intentional
-  sometimes — a small lookup table may want no limit). They must fire only on
-  clear-cut cases to preserve precision.
-- Because heuristic descriptors leave these fields `undefined`, no-ORM code never
-  triggers these three (it only gets `query-in-loop`). Adding another ORM adapter
-  later automatically lights these rules up for that ORM — no rule changes.
+### 5.2 `unbounded-read` — precise-adapter descriptors only
+- Fires when **all**: `operation === "read"`, `hasFilter === false`, **and**
+  `hasLimit === false`. Requiring *both* clauses absent is what makes it
+  high-signal: a full read with no `where` and no `take` is very likely an
+  unbounded full-table/collection scan.
+- Fires **only when both fields are known** (`false`), never when `undefined`.
+  Heuristic (no-ORM) descriptors leave them `undefined`, so no-ORM code never
+  triggers this rule — it only gets `query-in-loop`.
+- Severity: **warning**.
+- Preserves the canonical good example: `prisma.user.findMany({ where: { id: {
+  in: ids } } })` has a filter (`hasFilter === true`) → not flagged.
+- Adding another ORM adapter later lights this rule up for that ORM with no rule
+  changes.
 
 ### 5.3 Prisma adapter changes
-Populate the new fields by inspecting the call's options object literal:
-- `selectedFields`: keys of a `select` object (or `[]` when no `select`/`include`
-  projection is present).
+Populate the new fields by inspecting the call's first options object literal:
 - `hasLimit`: whether a `take` property is present.
 - `hasFilter`: whether a `where` property is present.
+- `selectedFields`: keys of a `select` object when present, else `[]` (kept for
+  the deferred `over-fetch` rule; no rule consumes it in this slice).
 - `confidence: "high"`.
 
 ---
@@ -195,9 +204,10 @@ extension changes**: Prisma-in-loop shows red, everything else shows yellow.
     `dataAccess.retrieveUsers` in `.map` → warning; a write-in-loop → flagged; a
     single awaited query (no loop) → nothing; `array.find(...)`/`res.json(...)` →
     nothing.
-  - `over-fetch`/`missing-limit`/`missing-filter`: Prisma read missing the
-    relevant clause → warning; the same read *with* it → nothing; a heuristic
-    (no-ORM) call → nothing (fields unknown).
+  - `unbounded-read`: Prisma read with neither `where` nor `take` → warning; the
+    same read with a `where` (or a `take`) → nothing; the canonical batched
+    `findMany({ where: { id: { in } } })` → nothing; a heuristic (no-ORM) call →
+    nothing (fields unknown).
 - **Regression:** existing Prisma N+1 stays an **error**.
 - **Knowledge base:** each rule's fixtures trace to its `docs/database-knowledge/`
   entry; false-positive notes feed the FP corpus.
@@ -208,12 +218,13 @@ extension changes**: Prisma-in-loop shows red, everything else shows yellow.
 
 - The custom `dataAccess.retrieveUsers`-in-`.map` snippet produces a **warning**
   (no-ORM path proven).
-- A Prisma read in a loop is an **error**; a Prisma read with no `select` / no
-  `take` / no `where` each produce the corresponding **warning**.
-- No-ORM code never produces a shape-rule (over-fetch/limit/filter) diagnostic
-  (no false shape claims).
-- Adding a hypothetical second ORM adapter would light up all four rules for it
-  with zero rule-code changes (extensibility proven by construction).
+- A Prisma read in a loop is an **error**; a Prisma read with neither `where` nor
+  `take` produces an `unbounded-read` **warning**; the canonical batched
+  `findMany({ where: { id: { in } } })` produces nothing.
+- No-ORM code never produces an `unbounded-read` diagnostic (no false shape
+  claims).
+- Adding a hypothetical second ORM adapter would light up both rules for it with
+  zero rule-code changes (extensibility proven by construction).
 
 ---
 
@@ -222,8 +233,9 @@ extension changes**: Prisma-in-loop shows red, everything else shows yellow.
 - **Heuristic false positives** — mitigated by the `await`-required guard, the
   property-access requirement, and the Array/Map/Promise/`res.*` blocklist; and by
   emitting only **warnings**, never errors, on heuristic matches.
-- **Shape-rule noise** — mitigated by firing only on *known* (`false`) fields and
-  at **warning** severity; over-fetch keyed on an explicit empty projection, not
-  mere absence of knowledge.
+- **Shape-rule noise** — the reason `unbounded-read` requires *both* `hasFilter`
+  and `hasLimit` to be known `false`: a single-clause trigger flags legitimate
+  queries. Fires only on *known* fields, at **warning** severity. Over-fetch
+  (single-clause, noisy) is deferred for this reason.
 - **Catalog coherence** — all rules consume one descriptor contract; the
   `undefined` = unknown convention is the single rule every consumer must respect.
