@@ -1,0 +1,34 @@
+{
+  "name": "queryguard-vscode",
+  "displayName": "QueryGuard",
+  "description": "Flags inefficient database access (N+1 queries) in TypeScript/JavaScript as you type.",
+  "version": "0.0.0",
+  "publisher": "anujchhikara",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/AnujChhikara/queryguard" },
+  "engines": { "vscode": "^1.85.0" },
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:typescript",
+    "onLanguage:javascript",
+    "onLanguage:typescriptreact",
+    "onLanguage:javascriptreact"
+  ],
+  "contributes": {},
+  "scripts": {
+    "build": "tsup",
+    "package": "tsup && vsce package --no-dependencies -o queryguard.vsix",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@queryguard/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.24.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}
