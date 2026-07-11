@@ -12,3 +12,4 @@ export * from "./knowledge/load.js";
 export * from "./knowledge/cardinality.js";
 export * from "./knowledge/driving-set.js";
 export * from "./knowledge/hints.js";
+export * from "./knowledge/suppress.js";

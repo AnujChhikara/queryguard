@@ -7,6 +7,7 @@ import { overFetchRule } from "./rules/over-fetch.js";
 import { estimateCardinality } from "./knowledge/cardinality.js";
 import { resolveDrivingSet } from "./knowledge/driving-set.js";
 import { readInlineHint } from "./knowledge/hints.js";
+import { filterSuppressed } from "./knowledge/suppress.js";
 import type { Knowledge, Cardinality } from "./knowledge/types.js";
 import type { Diagnostic, QueryDescriptor, Rule } from "./types.js";
 import type { CallExpression } from "ts-morph";
@@ -69,5 +70,5 @@ export function analyzeSource(
       // Best-effort: a throwing rule is skipped, never fatal.
     }
   }
-  return diagnostics;
+  return filterSuppressed(diagnostics, descriptors, filePath, knowledge);
 }
