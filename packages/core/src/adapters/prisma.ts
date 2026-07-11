@@ -1,6 +1,6 @@
-import { Node } from "ts-morph";
+import { Node, SyntaxKind } from "ts-morph";
 import type { CallExpression } from "ts-morph";
-import type { QueryDescriptor } from "../types.js";
+import type { QueryDescriptor, QueryFilter } from "../types.js";
 import { isInsideLoop } from "../loop.js";
 
 const READ_METHODS = new Set(["findMany", "findFirst", "findUnique", "findUniqueOrThrow", "findFirstOrThrow", "count", "aggregate", "groupBy"]);
@@ -17,14 +17,40 @@ function operationFor(method: string): QueryDescriptor["operation"] {
 
 const ALL_METHODS = new Set([...READ_METHODS, ...WRITE_METHODS, ...DELETE_METHODS]);
 
+function extractFilters(whereInit: unknown): QueryFilter[] {
+  const node = whereInit;
+  if (!node || !Node.isObjectLiteralExpression(node as Node)) return [];
+  return (node as import("ts-morph").ObjectLiteralExpression)
+    .getProperties()
+    .filter(Node.isPropertyAssignment)
+    .map((p): QueryFilter => {
+      const field = p.getName();
+      const init = p.getInitializer();
+      if (init && (Node.isStringLiteral(init) || Node.isNoSubstitutionTemplateLiteral(init))) {
+        return { field, value: init.getLiteralValue(), kind: "eq" };
+      }
+      if (init && Node.isNumericLiteral(init)) {
+        return { field, value: init.getLiteralValue(), kind: "eq" };
+      }
+      if (init && (init.getKind() === SyntaxKind.TrueKeyword || init.getKind() === SyntaxKind.FalseKeyword)) {
+        return { field, value: init.getText() === "true", kind: "eq" };
+      }
+      if (init && Node.isObjectLiteralExpression(init) && init.getProperty("in")) {
+        return { field, kind: "in" };
+      }
+      return { field, kind: "other" };
+    });
+}
+
 function readOptions(call: CallExpression): {
   hasLimit: boolean;
   hasFilter: boolean;
   selectedFields: string[];
+  filters: QueryFilter[];
 } {
   const [firstArg] = call.getArguments();
   if (!firstArg || !Node.isObjectLiteralExpression(firstArg)) {
-    return { hasLimit: false, hasFilter: false, selectedFields: [] };
+    return { hasLimit: false, hasFilter: false, selectedFields: [], filters: [] };
   }
   const hasProp = (name: string) => Boolean(firstArg.getProperty(name));
   const selectProp = firstArg.getProperty("select");
@@ -38,7 +64,15 @@ function readOptions(call: CallExpression): {
         .map((p) => p.getName());
     }
   }
-  return { hasLimit: hasProp("take"), hasFilter: hasProp("where"), selectedFields };
+  const whereProp = firstArg.getProperty("where");
+  const whereInit =
+    whereProp && Node.isPropertyAssignment(whereProp) ? whereProp.getInitializer() : undefined;
+  return {
+    hasLimit: hasProp("take"),
+    hasFilter: hasProp("where"),
+    selectedFields,
+    filters: extractFilters(whereInit),
+  };
 }
 
 export function prismaAdapter(call: CallExpression): QueryDescriptor | null {
@@ -71,6 +105,7 @@ export function prismaAdapter(call: CallExpression): QueryDescriptor | null {
     hasLimit: options.hasLimit,
     hasFilter: options.hasFilter,
     selectedFields: options.selectedFields,
+    filters: options.filters,
     isAggregate: AGGREGATE_METHODS.has(method),
   };
 }

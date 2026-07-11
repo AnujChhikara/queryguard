@@ -1,6 +1,15 @@
 import type { Node } from "ts-morph";
+import type { Cardinality, Knowledge } from "./knowledge/types.js";
+
+export type { Cardinality, Bound, Knowledge } from "./knowledge/types.js";
 
 export type Severity = "error" | "warning" | "info";
+
+export interface QueryFilter {
+  field: string;
+  value?: string | number | boolean;
+  kind: "eq" | "in" | "other";
+}
 
 export interface SourceRange {
   start: number;
@@ -25,6 +34,7 @@ export interface QueryDescriptor {
   selectedFields?: string[];
   hasLimit?: boolean;
   hasFilter?: boolean;
+  filters?: QueryFilter[];
   isAggregate?: boolean;
   node: Node;
   inLoop: boolean;
@@ -34,6 +44,9 @@ export interface QueryDescriptor {
 
 export interface RuleContext {
   descriptors: QueryDescriptor[];
+  knowledge?: Knowledge | null;
+  cardinalityOf?: (d: QueryDescriptor) => Cardinality;
+  loopBoundOf?: (d: QueryDescriptor) => Cardinality;
 }
 
 export interface Rule {

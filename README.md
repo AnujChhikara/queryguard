@@ -5,9 +5,10 @@ inefficient database access — N+1 loops, over-fetching, unbounded fan-out — 
 ESLint, but specialized for the data layer. 100% static: no LLM, no network, no
 database connection; your code never leaves your machine.
 
-> **Status:** early. Today QueryGuard ships a core engine and a CLI with one
-> rule (`n-plus-one`) and one adapter (Prisma). The VS Code extension and
-> additional rules/adapters are planned — see [Roadmap](#roadmap).
+> **Status:** early. Today QueryGuard ships a core engine and a CLI with three
+> rules (`n-plus-one`, `unbounded-read`, `over-fetch`), a Prisma adapter, and an
+> optional **knowledge file** that makes the rules scale-aware. The VS Code
+> extension and additional adapters are planned — see [Roadmap](#roadmap).
 
 ## What's here
 
@@ -79,6 +80,50 @@ The fix (single query, no loop) reports zero problems and exits `0`:
 const users = await prisma.user.findMany({ include: { posts: true } })
 ```
 
+## Business-logic context
+
+Structural rules see *shape*, not *scale* — a query in a loop looks like an N+1
+whether the loop runs twice or two million times. Drop a
+**`queryguard.knowledge.yaml`** next to your code to give QueryGuard the missing
+scale information. It's a static, human-authored file — it stays on your machine
+and is never transmitted.
+
+```yaml
+version: 1
+tables:
+  user:
+    rows: 10000
+    filters:
+      - when: { status: active }
+        rows: 10
+```
+
+With this file QueryGuard **silences** loops over provably-small sets,
+**escalates** loops over provably-large sets, and warns (`over-fetch`) when an
+unfiltered read on a large table has a selective alternative. QueryGuard
+discovers the file by walking up from the current directory; override with
+`--knowledge <path>` or disable with `--no-knowledge`.
+
+Where a set isn't statically traceable, annotate the loop:
+
+```ts
+// queryguard: bounded 10
+for (const id of getIds()) { await prisma.post.findMany({ where: { authorId: id } }); }
+```
+
+### Suppressing a diagnostic
+
+To silence a specific finding, record a suppression instead of editing code:
+
+```bash
+node packages/cli/dist/bin.js suppress "src/contacts.ts:42" --reason "list is admin-curated, < 20"
+```
+
+This appends an entry to the knowledge file matched by rule + enclosing function +
+the normalized call text (never the line number, so it survives edits above the
+call). Run it without `--reason` for an interactive prompt. Full details:
+[`docs/database-knowledge/business-logic-context.md`](docs/database-knowledge/business-logic-context.md).
+
 ## How it works
 
 QueryGuard is designed around a **three-lane pipeline**, split by *when* a check
@@ -98,7 +143,7 @@ Rule-authoring reference: [`docs/database-knowledge/`](docs/database-knowledge/)
 ## Roadmap
 
 - VS Code extension (`@queryguard/vscode`) — live squiggles + hovers, sharing this engine.
-- More Lane 1/2/3 rules: unbounded fan-out, over-fetch, missing limit.
+- More Lane 1/2/3 rules: missing limit, and Lane 2 engine-specific limits.
 - More adapters beyond Prisma (Drizzle, raw SQL) and more engines (MySQL/PlanetScale/Postgres).
 - Config (`queryguard.config.ts`): enable/disable rules, severity overrides.
 

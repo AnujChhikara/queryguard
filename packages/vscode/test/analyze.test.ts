@@ -2,13 +2,13 @@ import { describe, it, expect } from "vitest";
 import { toVsDiagnostics } from "../src/analyze.js";
 
 const N_PLUS_ONE = `
-const users = await prisma.user.findMany()
+const users = await prisma.user.findMany({ where: { active: true } })
 for (const user of users) {
   const posts = await prisma.post.findMany({ where: { authorId: user.id } })
 }
 `;
 
-const CLEAN = `const users = await prisma.user.findMany({ include: { posts: true } })`;
+const CLEAN = `const users = await prisma.user.findMany({ where: { id: 1 }, include: { posts: true } })`;
 const BROKEN = "const = = = @@@ (";
 
 describe("toVsDiagnostics", () => {

@@ -4,13 +4,19 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": { ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" } },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "test": "vitest run",
     "build": "tsup src/index.ts --format esm --dts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "ts-morph": "^23.0.0"
+    "ts-morph": "^23.0.0",
+    "yaml": "^2.9.0"
   }
 }
