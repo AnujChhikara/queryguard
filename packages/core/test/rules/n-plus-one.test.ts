@@ -54,4 +54,28 @@ describe("nPlusOneRule", () => {
     expect(diags[0].ruleId).toBe("n-plus-one");
     expect(diags[0].severity).toBe("error");
   });
+
+  it("suppresses when loopBoundOf reports small", () => {
+    const ctx = {
+      descriptors: descriptors(`async function r(prisma, ids){ for (const id of ids){ await prisma.user.findUnique({ where: { id } }); } }`),
+      loopBoundOf: () => ({ count: 10, bound: "small" as const, source: "none" as const }),
+    };
+    expect(nPlusOneRule.match(ctx)).toHaveLength(0);
+  });
+
+  it("escalates the message with the count when loopBoundOf reports large", () => {
+    const ctx = {
+      descriptors: descriptors(`async function r(prisma, ids){ for (const id of ids){ await prisma.user.findUnique({ where: { id } }); } }`),
+      loopBoundOf: () => ({ count: 10000, bound: "large" as const, source: "table" as const }),
+    };
+    const diags = nPlusOneRule.match(ctx);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].severity).toBe("error");
+    expect(diags[0].message).toContain("10000");
+  });
+
+  it("keeps today's behavior when loopBoundOf is absent", () => {
+    const ctx = { descriptors: descriptors(`async function r(prisma, ids){ for (const id of ids){ await prisma.user.findUnique({ where: { id } }); } }`) };
+    expect(nPlusOneRule.match(ctx)).toHaveLength(1);
+  });
 });

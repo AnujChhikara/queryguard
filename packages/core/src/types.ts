@@ -1,6 +1,8 @@
 import type { Node } from "ts-morph";
 import type { Cardinality, Knowledge } from "./knowledge/types.js";
 
+export type { Cardinality, Bound, Knowledge } from "./knowledge/types.js";
+
 export type Severity = "error" | "warning" | "info";
 
 export interface QueryFilter {
