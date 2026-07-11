@@ -2,15 +2,18 @@
   "name": "queryguard",
   "private": true,
   "version": "0.0.0",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "test": "pnpm -r build && pnpm -r test",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {
+    "@types/node": "^26.1.1",
+    "tsup": "^8.0.0",
     "typescript": "^5.5.0",
-    "vitest": "^2.0.0",
-    "tsup": "^8.0.0"
+    "vitest": "^2.0.0"
   }
 }

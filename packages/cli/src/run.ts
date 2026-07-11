@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import fg from "fast-glob";
 import { analyzeSource } from "@queryguard/core";
-import type { Diagnostic } from "@queryguard/core";
+import type { Diagnostic, Knowledge } from "@queryguard/core";
 
 export interface FileDiagnostic extends Diagnostic {
   file: string;
@@ -11,6 +11,7 @@ export interface FileDiagnostic extends Diagnostic {
 export async function run(
   patterns: string[],
   cwd: string,
+  options: { knowledge?: Knowledge | null } = {},
 ): Promise<{ diagnostics: FileDiagnostic[]; errorCount: number }> {
   const files = await fg(patterns, { cwd, absolute: false });
   const diagnostics: FileDiagnostic[] = [];
@@ -23,7 +24,7 @@ export async function run(
     } catch {
       continue;
     }
-    for (const diag of analyzeSource(code, abs)) {
+    for (const diag of analyzeSource(code, abs, options.knowledge ?? null)) {
       diagnostics.push({ ...diag, file });
     }
   }
