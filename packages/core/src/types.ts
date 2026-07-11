@@ -2,6 +2,12 @@ import type { Node } from "ts-morph";
 
 export type Severity = "error" | "warning" | "info";
 
+export interface QueryFilter {
+  field: string;
+  value?: string | number | boolean;
+  kind: "eq" | "in" | "other";
+}
+
 export interface SourceRange {
   start: number;
   end: number;
@@ -25,6 +31,7 @@ export interface QueryDescriptor {
   selectedFields?: string[];
   hasLimit?: boolean;
   hasFilter?: boolean;
+  filters?: QueryFilter[];
   isAggregate?: boolean;
   node: Node;
   inLoop: boolean;

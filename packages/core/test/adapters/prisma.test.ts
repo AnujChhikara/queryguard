@@ -54,4 +54,33 @@ describe("prismaAdapter", () => {
     const call = firstCall(`async function r(prisma){ await prisma.user.findMany({ select: { id: true, name: true } }); }`, "prisma.user.findMany");
     expect(prismaAdapter(call)!.selectedFields).toEqual(["id", "name"]);
   });
+
+  it("extracts equality where-predicates into filters", () => {
+    const call = firstCall(
+      `async function r(prisma){ await prisma.user.findMany({ where: { status: "active", orgId: 3 } }); }`,
+      "prisma.user.findMany",
+    );
+    const d = prismaAdapter(call)!;
+    expect(d.filters).toEqual([
+      { field: "status", value: "active", kind: "eq" },
+      { field: "orgId", value: 3, kind: "eq" },
+    ]);
+  });
+
+  it("classifies an { in: [...] } predicate as kind 'in' and nested objects as 'other'", () => {
+    const call = firstCall(
+      `async function r(prisma){ await prisma.user.findMany({ where: { id: { in: [1,2] }, profile: { age: 5 } } }); }`,
+      "prisma.user.findMany",
+    );
+    const d = prismaAdapter(call)!;
+    expect(d.filters).toEqual([
+      { field: "id", kind: "in" },
+      { field: "profile", kind: "other" },
+    ]);
+  });
+
+  it("leaves filters empty when there is no where", () => {
+    const call = firstCall(`async function r(prisma){ await prisma.user.findMany(); }`, "prisma.user.findMany");
+    expect(prismaAdapter(call)!.filters).toEqual([]);
+  });
 });
