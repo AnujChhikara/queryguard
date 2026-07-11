@@ -8,3 +8,4 @@ export * from "./rules/n-plus-one.js";
 export * from "./rules/unbounded-read.js";
 export * from "./engine.js";
 export * from "./knowledge/load.js";
+export * from "./knowledge/cardinality.js";
