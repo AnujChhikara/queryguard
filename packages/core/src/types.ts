@@ -1,4 +1,5 @@
 import type { Node } from "ts-morph";
+import type { Cardinality, Knowledge } from "./knowledge/types.js";
 
 export type Severity = "error" | "warning" | "info";
 
@@ -41,6 +42,9 @@ export interface QueryDescriptor {
 
 export interface RuleContext {
   descriptors: QueryDescriptor[];
+  knowledge?: Knowledge | null;
+  cardinalityOf?: (d: QueryDescriptor) => Cardinality;
+  loopBoundOf?: (d: QueryDescriptor) => Cardinality;
 }
 
 export interface Rule {
