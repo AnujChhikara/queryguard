@@ -3,6 +3,7 @@ import { prismaAdapter } from "./adapters/prisma.js";
 import { heuristicAdapter } from "./adapters/heuristic.js";
 import { nPlusOneRule } from "./rules/n-plus-one.js";
 import { unboundedReadRule } from "./rules/unbounded-read.js";
+import { overFetchRule } from "./rules/over-fetch.js";
 import { estimateCardinality } from "./knowledge/cardinality.js";
 import { resolveDrivingSet } from "./knowledge/driving-set.js";
 import { readInlineHint } from "./knowledge/hints.js";
@@ -11,7 +12,7 @@ import type { Diagnostic, QueryDescriptor, Rule } from "./types.js";
 import type { CallExpression } from "ts-morph";
 
 const adapters: Array<(call: CallExpression) => QueryDescriptor | null> = [prismaAdapter, heuristicAdapter];
-const rules: Rule[] = [nPlusOneRule, unboundedReadRule];
+const rules: Rule[] = [nPlusOneRule, unboundedReadRule, overFetchRule];
 
 export function analyzeSource(
   code: string,
