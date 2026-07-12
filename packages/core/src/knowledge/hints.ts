@@ -4,7 +4,7 @@ import type { Node as TsNode } from "ts-morph";
 export type InlineHint = { kind: "bounded" | "unbounded"; count?: number };
 
 const ITERATION_METHODS = new Set(["map", "forEach", "flatMap"]);
-const HINT_RE = /queryguard:\s*(bounded|unbounded)(?:\s+(\d+))?/;
+const HINT_RE = /cardinal:\s*(bounded|unbounded)(?:\s+(\d+))?/;
 
 /** The statement/expression whose leading comment carries the loop hint. */
 function loopCarrier(queryNode: TsNode): TsNode | null {

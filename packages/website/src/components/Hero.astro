@@ -1,5 +1,5 @@
 ---
-const repo = "https://github.com/AnujChhikara/queryguard";
+const repo = "https://github.com/AnujChhikara/cardinal";
 
 // Rendered with set:html so the braces in the code aren't parsed as Astro expressions.
 const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users = <span class="kw">await</span> prisma.user.findMany()
@@ -17,7 +17,7 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
         <span class="mark">10,000 times</span>.
       </h1>
       <p class="sub">
-        QueryGuard is a static linter that catches N+1 loops, unbounded reads, and
+        Cardinal is a static linter that catches N+1 loops, unbounded reads, and
         over-fetching — before they reach production. No LLM, no database
         connection; your code never leaves your machine.
       </p>
@@ -32,7 +32,7 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
 
     <div class="card-wrap">
       <div class="glow" aria-hidden="true"></div>
-      <figure class="card" aria-label="A QueryGuard N+1 diagnostic on a Prisma query">
+      <figure class="card" aria-label="A Cardinal N+1 diagnostic on a Prisma query">
         <figcaption class="chrome">
           <span class="d"></span><span class="d"></span><span class="d"></span>
           <span class="file">users.service.ts</span>

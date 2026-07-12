@@ -1,11 +1,11 @@
-# QueryGuard
+# Cardinal
 
 **A database-aware static analyzer for TypeScript/JavaScript.** It flags
 inefficient database access — N+1 loops, over-fetching, unbounded fan-out — like
 ESLint, but specialized for the data layer. 100% static: no LLM, no network, no
 database connection; your code never leaves your machine.
 
-> **Status:** early. Today QueryGuard ships a core engine, a CLI, and a VS Code
+> **Status:** early. Today Cardinal ships a core engine, a CLI, and a VS Code
 > extension with three rules (`n-plus-one`, `unbounded-read`, `over-fetch`),
 > adapters for **Prisma, Drizzle, Mongoose, and raw SQL** (plus a heuristic
 > fallback), and an optional **knowledge file** that makes the rules
@@ -17,8 +17,8 @@ This is a pnpm monorepo:
 
 | Package | What it does |
 |---------|--------------|
-| `@queryguard/core` | Parses TS with ts-morph, normalizes query calls into `QueryDescriptor`s, runs rules, emits diagnostics. Front-end-agnostic. |
-| `@queryguard/cli` | Globs files, runs the engine, prints diagnostics, sets the exit code (for CI gates). |
+| `@cardinal/core` | Parses TS with ts-morph, normalizes query calls into `QueryDescriptor`s, runs rules, emits diagnostics. Front-end-agnostic. |
+| `@cardinal/cli` | Globs files, runs the engine, prints diagnostics, sets the exit code (for CI gates). |
 
 ## Requirements
 
@@ -85,7 +85,7 @@ const users = await prisma.user.findMany({ include: { posts: true } })
 
 Structural rules see *shape*, not *scale* — a query in a loop looks like an N+1
 whether the loop runs twice or two million times. Drop a
-**`queryguard.knowledge.yaml`** next to your code to give QueryGuard the missing
+**`cardinal.knowledge.yaml`** next to your code to give Cardinal the missing
 scale information. It's a static, human-authored file — it stays on your machine
 and is never transmitted.
 
@@ -99,16 +99,16 @@ tables:
         rows: 10
 ```
 
-With this file QueryGuard **silences** loops over provably-small sets,
+With this file Cardinal **silences** loops over provably-small sets,
 **escalates** loops over provably-large sets, and warns (`over-fetch`) when an
-unfiltered read on a large table has a selective alternative. QueryGuard
+unfiltered read on a large table has a selective alternative. Cardinal
 discovers the file by walking up from the current directory; override with
 `--knowledge <path>` or disable with `--no-knowledge`.
 
 Where a set isn't statically traceable, annotate the loop:
 
 ```ts
-// queryguard: bounded 10
+// cardinal: bounded 10
 for (const id of getIds()) { await prisma.post.findMany({ where: { authorId: id } }); }
 ```
 
@@ -127,7 +127,7 @@ call). Run it without `--reason` for an interactive prompt. Full details:
 
 ## How it works
 
-QueryGuard is designed around a **three-lane pipeline**, split by *when* a check
+Cardinal is designed around a **three-lane pipeline**, split by *when* a check
 runs:
 
 - **Lane 1 — Syntactic** (every keystroke): high-confidence structural errors. `n-plus-one` lives here.
@@ -138,16 +138,16 @@ Guiding principle: **precision over recall** — a linter that cries wolf gets
 disabled the same day. High-confidence checks are errors; inferred checks are
 warnings.
 
-Design details: [`docs/superpowers/specs/2026-07-10-queryguard-design.md`](docs/superpowers/specs/2026-07-10-queryguard-design.md).
+Design details: [`docs/superpowers/specs/2026-07-10-queryguard-design.md`](docs/superpowers/specs/2026-07-10-queryguard-design.md) (original design docs predate the rename).
 Rule-authoring reference: [`docs/database-knowledge/`](docs/database-knowledge/).
 
 ## Roadmap
 
-- VS Code extension (`@queryguard/vscode`) — live squiggles + hovers, sharing this engine.
+- VS Code extension (`@cardinal/vscode`) — live squiggles + hovers, sharing this engine.
 - More Lane 1/2/3 rules: missing limit, and Lane 2 engine-specific limits.
 - Deepen the newer adapters: predicate-value extraction (unlocks `over-fetch`/cardinality beyond Prisma), Drizzle's chained query builder, and a real SQL parser.
 - More engines (MySQL/PlanetScale/Postgres) and more data layers (TypeORM, Kysely).
-- Config (`queryguard.config.ts`): enable/disable rules, severity overrides.
+- Config (`cardinal.config.ts`): enable/disable rules, severity overrides.
 
 ## License
 

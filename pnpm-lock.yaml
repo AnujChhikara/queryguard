@@ -23,7 +23,7 @@ importers:
 
   packages/cli:
     dependencies:
-      '@queryguard/core':
+      '@cardinal/core':
         specifier: workspace:*
         version: link:../core
       fast-glob:
@@ -41,7 +41,7 @@ importers:
 
   packages/vscode:
     dependencies:
-      '@queryguard/core':
+      '@cardinal/core':
         specifier: workspace:*
         version: link:../core
     devDependencies:

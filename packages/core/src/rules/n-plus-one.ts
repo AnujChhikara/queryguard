@@ -22,7 +22,7 @@ export const nPlusOneRule: Rule = {
               severity: "error",
               message: `Query on "${d.target}" runs once per row of ${amount}-row set (N+1 amplified). Batch it into a single query (e.g. a WHERE ... IN / findMany).`,
               node: d.node,
-              docsUrl: "https://queryguard.dev/rules/n-plus-one",
+              docsUrl: "https://cardinal.dev/rules/n-plus-one",
             }),
           ];
         }
@@ -38,7 +38,7 @@ export const nPlusOneRule: Rule = {
             severity,
             message,
             node: d.node,
-            docsUrl: "https://queryguard.dev/rules/n-plus-one",
+            docsUrl: "https://cardinal.dev/rules/n-plus-one",
           }),
         ];
       });

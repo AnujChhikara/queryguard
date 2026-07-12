@@ -7,7 +7,7 @@ export * from "./types.js";
 
 export const DEFAULT_THRESHOLDS: Thresholds = { small: 50, large: 1000 };
 
-const FILE_NAMES = ["queryguard.knowledge.yaml", "queryguard.knowledge.yml", "queryguard.knowledge.json"];
+const FILE_NAMES = ["cardinal.knowledge.yaml", "cardinal.knowledge.yml", "cardinal.knowledge.json"];
 
 export function parseKnowledge(text: string, baseDir: string): Knowledge | null {
   let raw: unknown;

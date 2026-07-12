@@ -4,7 +4,7 @@ export default defineConfig({
   entry: ["src/extension.ts"],
   format: ["cjs"],
   external: ["vscode"],
-  noExternal: ["@queryguard/core"],
+  noExternal: ["@cardinal/core"],
   outDir: "dist",
   clean: true,
 });

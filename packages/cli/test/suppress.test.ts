@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { parseKnowledge } from "@queryguard/core";
+import { parseKnowledge } from "@cardinal/core";
 import { suppressCommand } from "../src/suppress.js";
 
 let dir: string;
@@ -15,7 +15,7 @@ describe("suppressCommand", () => {
     const res = await suppressCommand("a.ts:2", dir, { reason: "ids are bounded", acceptFact: false }, async () => "");
     expect(res.code).toBe(0);
 
-    const k = parseKnowledge(readFileSync(join(dir, "queryguard.knowledge.yaml"), "utf8"), dir)!;
+    const k = parseKnowledge(readFileSync(join(dir, "cardinal.knowledge.yaml"), "utf8"), dir)!;
     expect(k.suppressions).toHaveLength(1);
     expect(k.suppressions[0].rule).toBe("n-plus-one");
     expect(k.suppressions[0].reason).toBe("ids are bounded");
@@ -36,7 +36,7 @@ describe("suppressCommand", () => {
     const res = await suppressCommand("a.ts:2", dir, { acceptFact: false }, async (q) => { asked = q; return "typed reason"; });
     expect(asked.toLowerCase()).toContain("why");
     expect(res.code).toBe(0);
-    const k = parseKnowledge(readFileSync(join(dir, "queryguard.knowledge.yaml"), "utf8"), dir)!;
+    const k = parseKnowledge(readFileSync(join(dir, "cardinal.knowledge.yaml"), "utf8"), dir)!;
     expect(k.suppressions[0].reason).toBe("typed reason");
   });
 });

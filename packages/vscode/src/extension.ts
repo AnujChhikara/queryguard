@@ -19,11 +19,11 @@ function toSeverity(s: MappedDiagnostic["severity"]): vscode.DiagnosticSeverity 
 }
 
 function knowledgeEnabled(): boolean {
-  return vscode.workspace.getConfiguration("queryguard").get<boolean>("useKnowledge", true);
+  return vscode.workspace.getConfiguration("cardinal").get<boolean>("useKnowledge", true);
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-  const collection = vscode.languages.createDiagnosticCollection("queryguard");
+  const collection = vscode.languages.createDiagnosticCollection("cardinal");
   context.subscriptions.push(collection);
 
   const timers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   function analyzeDocument(doc: vscode.TextDocument): void {
     if (!TARGET_LANGUAGES.has(doc.languageId)) return;
-    // Discover a queryguard.knowledge.yaml above the file being analyzed. The
+    // Discover a cardinal.knowledge.yaml above the file being analyzed. The
     // cache keeps the upward filesystem walk off the debounced hot path.
     const knowledge = knowledgeEnabled() ? knowledgeCache.get(dirname(doc.fileName)) : null;
     const mapped = toVsDiagnostics(doc.getText(), doc.fileName, knowledge);
@@ -41,7 +41,7 @@ export function activate(context: vscode.ExtensionContext): void {
         doc.positionAt(m.endOffset),
       );
       const diag = new vscode.Diagnostic(range, m.message, toSeverity(m.severity));
-      diag.source = "queryguard";
+      diag.source = "cardinal";
       diag.code = m.ruleId;
       return diag;
     });
@@ -69,7 +69,7 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   const watcher = vscode.workspace.createFileSystemWatcher(
-    "**/queryguard.knowledge.{yaml,yml,json}",
+    "**/cardinal.knowledge.{yaml,yml,json}",
   );
   watcher.onDidChange(refreshKnowledge);
   watcher.onDidCreate(refreshKnowledge);
@@ -89,7 +89,7 @@ export function activate(context: vscode.ExtensionContext): void {
       collection.delete(doc.uri);
     }),
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration("queryguard.useKnowledge")) refreshKnowledge();
+      if (e.affectsConfiguration("cardinal.useKnowledge")) refreshKnowledge();
     }),
   );
 

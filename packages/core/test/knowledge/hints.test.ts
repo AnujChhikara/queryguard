@@ -11,7 +11,7 @@ describe("readInlineHint", () => {
   it("reads 'bounded' with an optional count above a for-of loop", () => {
     const n = queryNode(
       `async function r(prisma, xs){
-        // queryguard: bounded 10
+        // cardinal: bounded 10
         for (const x of xs) { await prisma.post.findMany({ where: { authorId: x.id } }); }
       }`,
       "prisma.post.findMany",
@@ -22,7 +22,7 @@ describe("readInlineHint", () => {
   it("reads 'unbounded' above a .map iteration", () => {
     const n = queryNode(
       `async function r(prisma, xs){
-        // queryguard: unbounded
+        // cardinal: unbounded
         await Promise.all(xs.map(async (x) => prisma.post.findMany({ where: { authorId: x.id } })));
       }`,
       "prisma.post.findMany",

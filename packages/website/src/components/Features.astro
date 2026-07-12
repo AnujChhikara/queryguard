@@ -3,7 +3,7 @@ const rules = [
   {
     id: "n-plus-one",
     title: "N+1 loops",
-    body: "A query inside a loop runs once per row — 1 + N round trips. QueryGuard flags it and, with a knowledge file, silences the ones that are provably small.",
+    body: "A query inside a loop runs once per row — 1 + N round trips. Cardinal flags it and, with a knowledge file, silences the ones that are provably small.",
   },
   {
     id: "unbounded-read",
@@ -13,7 +13,7 @@ const rules = [
   {
     id: "over-fetch",
     title: "Over-fetching",
-    body: "Loading a whole large table when a selective subset would do. QueryGuard suggests the narrower read from facts you declare about your data.",
+    body: "Loading a whole large table when a selective subset would do. Cardinal suggests the narrower read from facts you declare about your data.",
   },
 ];
 ---

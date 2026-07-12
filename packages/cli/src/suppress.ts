@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join, isAbsolute } from "node:path";
-import { buildSuppressPlan, addSuppression, addFact, discoverKnowledge, loadKnowledge } from "@queryguard/core";
-import type { Knowledge } from "@queryguard/core";
+import { buildSuppressPlan, addSuppression, addFact, discoverKnowledge, loadKnowledge } from "@cardinal/core";
+import type { Knowledge } from "@cardinal/core";
 
 export interface SuppressOptions {
   reason?: string;
@@ -10,7 +10,7 @@ export interface SuppressOptions {
   knowledgePath?: string;
 }
 
-const KNOWLEDGE_FILENAME = "queryguard.knowledge.yaml";
+const KNOWLEDGE_FILENAME = "cardinal.knowledge.yaml";
 
 export async function suppressCommand(
   target: string,

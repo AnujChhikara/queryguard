@@ -34,7 +34,7 @@ describe("buildSuppressPlan", () => {
 describe("addSuppression / addFact", () => {
   it("appends a suppression to a new file and a fact to an existing table", () => {
     dir = mkdtempSync(join(tmpdir(), "qg-"));
-    const file = join(dir, "queryguard.knowledge.yaml");
+    const file = join(dir, "cardinal.knowledge.yaml");
 
     addSuppression(file, { rule: "n-plus-one", file: "src/x.ts", fn: "r", anchor: "db.q()", reason: "bounded", added: "2026-07-10" });
     let k = parseKnowledge(readFileSync(file, "utf8"), dir)!;

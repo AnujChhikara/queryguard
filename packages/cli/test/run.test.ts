@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { discoverKnowledge } from "@queryguard/core";
+import { discoverKnowledge } from "@cardinal/core";
 import { run } from "../src/run.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -27,7 +27,7 @@ describe("run", () => {
     const dir = mkdtempSync(join(tmpdir(), "qg-cli-"));
     try {
       writeFileSync(
-        join(dir, "queryguard.knowledge.yaml"),
+        join(dir, "cardinal.knowledge.yaml"),
         `version: 1\ntables:\n  user:\n    rows: 10000\n    filters:\n      - when: { status: active }\n        rows: 10\n`,
       );
       writeFileSync(join(dir, "a.ts"), `async function r(prisma){ return prisma.user.findMany(); }`);

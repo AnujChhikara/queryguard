@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { discoverKnowledge, loadKnowledge } from "@queryguard/core";
-import type { Knowledge } from "@queryguard/core";
+import { discoverKnowledge, loadKnowledge } from "@cardinal/core";
+import type { Knowledge } from "@cardinal/core";
 import { run } from "./run.js";
 
 function parseArgs(argv: string[]): { patterns: string[]; knowledgePath?: string; noKnowledge: boolean } {
@@ -40,14 +40,14 @@ async function main() {
 
   const { patterns, knowledgePath, noKnowledge } = parseArgs(argv);
   if (patterns.length === 0) {
-    console.error("usage: queryguard [--knowledge <path>] [--no-knowledge] <glob> [glob...]");
+    console.error("usage: cardinal [--knowledge <path>] [--no-knowledge] <glob> [glob...]");
     process.exit(2);
   }
 
   let knowledge: Knowledge | null = null;
   if (!noKnowledge) {
     knowledge = knowledgePath ? loadKnowledge(knowledgePath) : discoverKnowledge(process.cwd());
-    if (knowledge) console.error(`queryguard: using knowledge from ${knowledgePath ?? "queryguard.knowledge.yaml"}`);
+    if (knowledge) console.error(`cardinal: using knowledge from ${knowledgePath ?? "cardinal.knowledge.yaml"}`);
   }
 
   const { diagnostics, errorCount } = await run(patterns, process.cwd(), { knowledge });

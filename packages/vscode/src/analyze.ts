@@ -1,4 +1,4 @@
-import { analyzeSource, type Diagnostic, type Knowledge } from "@queryguard/core";
+import { analyzeSource, type Diagnostic, type Knowledge } from "@cardinal/core";
 
 export interface MappedDiagnostic {
   startOffset: number;
@@ -9,7 +9,7 @@ export interface MappedDiagnostic {
 }
 
 /**
- * Runs the QueryGuard engine on a source string and maps each diagnostic to a
+ * Runs the Cardinal engine on a source string and maps each diagnostic to a
  * neutral, editor-agnostic shape carrying absolute character offsets.
  * Best-effort: never throws — returns [] on any engine error.
  *

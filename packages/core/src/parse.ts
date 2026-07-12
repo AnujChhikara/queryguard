@@ -10,7 +10,7 @@ const project = new Project({
 let counter = 0;
 
 export function parseSource(code: string, filePath?: string): SourceFile {
-  const name = filePath ?? `__queryguard_${counter++}.ts`;
+  const name = filePath ?? `__cardinal_${counter++}.ts`;
   return project.createSourceFile(name, code, { overwrite: true });
 }
 

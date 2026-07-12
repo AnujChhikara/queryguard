@@ -1,11 +1,11 @@
 {
-  "name": "queryguard-vscode",
-  "displayName": "QueryGuard",
+  "name": "cardinal-vscode",
+  "displayName": "Cardinal",
   "description": "Flags inefficient database access (N+1 queries) in TypeScript/JavaScript as you type.",
   "version": "0.0.0",
   "publisher": "anujchhikara",
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/AnujChhikara/queryguard" },
+  "repository": { "type": "git", "url": "https://github.com/AnujChhikara/cardinal" },
   "engines": { "vscode": "^1.85.0" },
   "main": "./dist/extension.js",
   "activationEvents": [
@@ -16,24 +16,24 @@
   ],
   "contributes": {
     "configuration": {
-      "title": "QueryGuard",
+      "title": "Cardinal",
       "properties": {
-        "queryguard.useKnowledge": {
+        "cardinal.useKnowledge": {
           "type": "boolean",
           "default": true,
-          "description": "Use a discovered queryguard.knowledge.yaml file to make diagnostics scale-aware (silence provably-small loops, escalate provably-large fan-out, and flag over-fetching)."
+          "description": "Use a discovered cardinal.knowledge.yaml file to make diagnostics scale-aware (silence provably-small loops, escalate provably-large fan-out, and flag over-fetching)."
         }
       }
     }
   },
   "scripts": {
     "build": "tsup",
-    "package": "tsup && vsce package --no-dependencies -o queryguard.vsix",
+    "package": "tsup && vsce package --no-dependencies -o cardinal.vsix",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@queryguard/core": "workspace:*"
+    "@cardinal/core": "workspace:*"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",

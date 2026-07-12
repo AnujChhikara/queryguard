@@ -1,15 +1,15 @@
 {
-  "name": "@queryguard/cli",
+  "name": "@cardinal/cli",
   "version": "0.0.0",
   "type": "module",
-  "bin": { "queryguard": "./dist/bin.js" },
+  "bin": { "cardinal": "./dist/bin.js" },
   "scripts": {
     "test": "vitest run",
     "build": "tsup src/bin.ts --format esm",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@queryguard/core": "workspace:*",
+    "@cardinal/core": "workspace:*",
     "fast-glob": "^3.3.0"
   }
 }

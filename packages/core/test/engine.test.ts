@@ -115,7 +115,7 @@ tables:
   it("honors an inline bounded hint even without a traceable producer", () => {
     const diags = analyzeSource(
       `async function r(prisma, xs){
-        // queryguard: bounded
+        // cardinal: bounded
         for (const x of xs) { await prisma.post.findMany({ where: { authorId: x.id } }); }
       }`,
       undefined,

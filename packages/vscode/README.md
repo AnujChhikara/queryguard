@@ -1,7 +1,7 @@
-# QueryGuard for VS Code
+# Cardinal for VS Code
 
 Flags inefficient database access — starting with N+1 query loops — in
-TypeScript/JavaScript **as you type**. Powered by the `@queryguard/core` engine
+TypeScript/JavaScript **as you type**. Powered by the `@cardinal/core` engine
 (100% static: no LLM, no network, no database connection).
 
 ## What it flags today

@@ -1,4 +1,4 @@
-# QueryGuard Database Knowledge Base
+# Cardinal Database Knowledge Base
 
 **Dev-time reference only.** This is developer material we read *before writing a
 rule* — not shipped product content, not Lane 2 rule data, not a runtime

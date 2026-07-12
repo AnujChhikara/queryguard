@@ -2,7 +2,7 @@
 
 _Last checked against source: 2026-07-12._
 
-QueryGuard's structural rules see *shape*, not *scale*: a query in a loop looks
+Cardinal's structural rules see *shape*, not *scale*: a query in a loop looks
 like an N+1 whether the loop runs twice or two million times. The
 **knowledge file** gives the analyzer the missing scale information — a static,
 human-authored description of how big your tables are and how selective your
@@ -16,7 +16,7 @@ Nothing is transmitted, no database is connected, no LLM is consulted.
 
 ## The file
 
-QueryGuard discovers `queryguard.knowledge.yaml` (or `.yml` / `.json`) by walking
+Cardinal discovers `cardinal.knowledge.yaml` (or `.yml` / `.json`) by walking
 up from the current directory to the filesystem root — the first match wins. With
 no file present, output is byte-identical to running without knowledge.
 
@@ -38,7 +38,7 @@ tables:
   tag:
     rows: 12
 
-# Written by `queryguard suppress`; you can also hand-edit.
+# Written by `cardinal suppress`; you can also hand-edit.
 suppressions:
   - rule: n-plus-one
     file: src/contacts.ts
@@ -72,7 +72,7 @@ for (const u of active) {
 The driving-set trace is **conservative**: it resolves only the unambiguous case
 — the loop iterates a bare identifier, declared exactly once in the same function,
 never reassigned, initialized by a single known query call. Anything else falls
-back to `unknown` (today's behavior). Precision over recall: QueryGuard never
+back to `unknown` (today's behavior). Precision over recall: Cardinal never
 silences a real N+1 on a guess.
 
 ### 2. Escalate provably-large fan-out
@@ -109,12 +109,12 @@ annotate the loop directly. A hint leads the enclosing loop statement (or the
 `.map`/`.forEach`/`.flatMap` call):
 
 ```ts
-// queryguard: bounded 10
+// cardinal: bounded 10
 for (const x of getIds()) {
   await prisma.post.findMany({ where: { authorId: x } });   // treated as small → silenced
 }
 
-// queryguard: unbounded
+// cardinal: unbounded
 for (const x of getIds()) { ... }                            // treated as large → escalated
 ```
 
@@ -126,7 +126,7 @@ large. Hints take precedence over the driving-set trace.
 ## Suppressing a diagnostic
 
 ```
-queryguard suppress <file>:<line> [--rule <id>] [--reason <text>] [--yes] [--knowledge <path>]
+cardinal suppress <file>:<line> [--rule <id>] [--reason <text>] [--yes] [--knowledge <path>]
 ```
 
 `suppress` locates the single diagnostic on that line (pass `--rule` to

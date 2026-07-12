@@ -28,7 +28,7 @@ export const overFetchRule: Rule = {
             severity: "warning",
             message: `Read on "${d.target}" loads all ~${table.rows} rows, but a "${pred}" (~${smallFilter.rows}) subset likely suffices. Add a where, or confirm you need the full table.`,
             node: d.node,
-            docsUrl: "https://queryguard.dev/rules/over-fetch",
+            docsUrl: "https://cardinal.dev/rules/over-fetch",
           }),
         ];
       });
