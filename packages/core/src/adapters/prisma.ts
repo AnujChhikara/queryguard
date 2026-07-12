@@ -1,5 +1,5 @@
 import { Node, SyntaxKind } from "ts-morph";
-import type { CallExpression } from "ts-morph";
+import type { CallExpression, Node as TsNode } from "ts-morph";
 import type { QueryDescriptor, QueryFilter } from "../types.js";
 import { isInsideLoop } from "../loop.js";
 
@@ -75,7 +75,9 @@ function readOptions(call: CallExpression): {
   };
 }
 
-export function prismaAdapter(call: CallExpression): QueryDescriptor | null {
+export function prismaAdapter(node: TsNode): QueryDescriptor | null {
+  if (!Node.isCallExpression(node)) return null;
+  const call = node;
   const expr = call.getExpression();
   // Expect: <base>.<model>.<method>
   if (!Node.isPropertyAccessExpression(expr)) return null;

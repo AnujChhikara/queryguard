@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { SyntaxKind } from "ts-morph";
 import { parseSource, findCallExpressions } from "../../src/parse.js";
 import { prismaAdapter } from "../../src/adapters/prisma.js";
 
@@ -8,6 +9,12 @@ function firstCall(code: string, calleeText: string) {
 }
 
 describe("prismaAdapter", () => {
+  it("returns null for a non-call node (tagged template)", () => {
+    const sf = parseSource("async function r(sql){ await sql`SELECT 1`; }");
+    const tagged = sf.getFirstDescendantByKind(SyntaxKind.TaggedTemplateExpression)!;
+    expect(prismaAdapter(tagged)).toBeNull();
+  });
+
   it("recognizes a findMany read call and fills the descriptor", () => {
     const call = firstCall(`async function r(prisma){ await prisma.user.findMany(); }`, "prisma.user.findMany");
     const d = prismaAdapter(call);

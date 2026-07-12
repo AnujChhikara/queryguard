@@ -1,4 +1,4 @@
-import { parseSource, findCallExpressions } from "./parse.js";
+import { parseSource, findQueryCandidates } from "./parse.js";
 import { prismaAdapter } from "./adapters/prisma.js";
 import { heuristicAdapter } from "./adapters/heuristic.js";
 import { nPlusOneRule } from "./rules/n-plus-one.js";
@@ -10,9 +10,9 @@ import { readInlineHint } from "./knowledge/hints.js";
 import { filterSuppressed } from "./knowledge/suppress.js";
 import type { Knowledge, Cardinality } from "./knowledge/types.js";
 import type { Diagnostic, QueryDescriptor, Rule } from "./types.js";
-import type { CallExpression } from "ts-morph";
+import type { Node } from "ts-morph";
 
-const adapters: Array<(call: CallExpression) => QueryDescriptor | null> = [prismaAdapter, heuristicAdapter];
+const adapters: Array<(node: Node) => QueryDescriptor | null> = [prismaAdapter, heuristicAdapter];
 const rules: Rule[] = [nPlusOneRule, unboundedReadRule, overFetchRule];
 
 export function analyzeSource(
@@ -21,12 +21,12 @@ export function analyzeSource(
   knowledge?: Knowledge | null,
 ): Diagnostic[] {
   const sf = parseSource(code, filePath);
-  const calls = findCallExpressions(sf);
+  const candidates = findQueryCandidates(sf);
 
   const descriptors: QueryDescriptor[] = [];
-  for (const call of calls) {
+  for (const candidate of candidates) {
     for (const adapter of adapters) {
-      const descriptor = adapter(call);
+      const descriptor = adapter(candidate);
       if (descriptor) {
         descriptors.push(descriptor);
         break;

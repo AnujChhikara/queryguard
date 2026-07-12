@@ -1,5 +1,5 @@
 import { Node } from "ts-morph";
-import type { CallExpression } from "ts-morph";
+import type { Node as TsNode } from "ts-morph";
 import type { QueryDescriptor } from "../types.js";
 import { isInsideLoop } from "../loop.js";
 
@@ -28,7 +28,9 @@ function looksLikeQueryVerb(method: string): boolean {
   return m.startsWith("get") || m.startsWith("find") || m.startsWith("retrieve") || m.startsWith("fetch");
 }
 
-export function heuristicAdapter(call: CallExpression): QueryDescriptor | null {
+export function heuristicAdapter(node: TsNode): QueryDescriptor | null {
+  if (!Node.isCallExpression(node)) return null;
+  const call = node;
   // 1. must be directly awaited
   if (!Node.isAwaitExpression(call.getParent())) return null;
 
