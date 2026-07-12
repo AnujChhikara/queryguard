@@ -71,4 +71,27 @@ describe("rawSqlAdapter", () => {
     const c = firstCall(`async function r(db){ await db.query({ not: "sql" }); }`, "db.query");
     expect(rawSqlAdapter(c)).toBeNull();
   });
+
+  it("extracts eq predicates from a WHERE clause", () => {
+    const t = taggedTemplate("async function r(sql){ await sql`SELECT * FROM users WHERE status = 'active' AND org_id = 3`; }");
+    expect(rawSqlAdapter(t)!.filters).toEqual([
+      { field: "status", value: "active", kind: "eq" },
+      { field: "org_id", value: 3, kind: "eq" },
+    ]);
+  });
+
+  it("marks an IN predicate as kind 'in'", () => {
+    const t = taggedTemplate("async function r(sql){ await sql`SELECT id FROM users WHERE id IN (1, 2, 3)`; }");
+    expect(rawSqlAdapter(t)!.filters).toEqual([{ field: "id", kind: "in" }]);
+  });
+
+  it("treats an interpolated value as unknown (eq with no value)", () => {
+    const t = taggedTemplate("async function r(sql, id){ await sql`SELECT * FROM users WHERE id = ${id}`; }");
+    expect(rawSqlAdapter(t)!.filters).toEqual([{ field: "id", kind: "eq" }]);
+  });
+
+  it("leaves filters empty when there is no WHERE", () => {
+    const t = taggedTemplate("async function r(sql){ await sql`SELECT * FROM users`; }");
+    expect(rawSqlAdapter(t)!.filters).toEqual([]);
+  });
 });

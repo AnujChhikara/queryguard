@@ -2,7 +2,8 @@ import { Node } from "ts-morph";
 import type { Node as TsNode } from "ts-morph";
 import type { QueryDescriptor } from "../types.js";
 import { isInsideLoop } from "../loop.js";
-import { countSqlJoins } from "../sql/parse.js";
+import { countSqlJoins, extractSqlFilters } from "../sql/parse.js";
+import type { QueryFilter } from "../types.js";
 
 const SQL_CALL_METHODS = new Set(["query", "execute", "raw"]);
 const LEADING_KEYWORD = /^[\s`'"(]*(SELECT|WITH|INSERT|UPDATE|DELETE)\b/i;
@@ -17,6 +18,7 @@ interface SqlFacts {
   hasLimit: boolean;
   isAggregate: boolean;
   sqlFlags: { orderByRand: boolean; leadingWildcardLike: boolean; joinCount: number };
+  filters: QueryFilter[];
 }
 
 /** Thin, regex-level read of a SQL string. Returns null if it isn't SQL. */
@@ -52,6 +54,7 @@ function analyzeSql(text: string): SqlFacts | null {
       leadingWildcardLike: LEADING_WILDCARD_LIKE.test(text),
       joinCount: countSqlJoins(text),
     },
+    filters: extractSqlFilters(text),
   };
 }
 
@@ -75,6 +78,7 @@ function descriptor(node: TsNode, facts: SqlFacts): QueryDescriptor {
     hasLimit: facts.hasLimit,
     hasFilter: facts.hasFilter,
     isAggregate: facts.isAggregate,
+    filters: facts.filters,
     sqlFlags: facts.sqlFlags,
   };
 }
