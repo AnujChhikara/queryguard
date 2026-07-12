@@ -65,11 +65,15 @@ Code Marketplace + Open VSX**, then cuts a GitHub Release with the `.vsix`.
 ### Your release flow
 
 ```bash
-pnpm release:version 0.2.0        # bumps core + cli + vscode in lockstep
+pnpm release:version 0.2.0            # bumps core + cli + vscode in lockstep
 git commit -am "release: v0.2.0"
-git tag v0.2.0
-git push --follow-tags            # ← the tag triggers the Release workflow
+git tag -a v0.2.0 -m "v0.2.0"        # annotated — required for --follow-tags
+git push --follow-tags               # ← the tag triggers the Release workflow
 ```
+
+> Use an **annotated** tag (`-a`). `git push --follow-tags` only pushes annotated
+> tags; a lightweight `git tag v0.2.0` won't be pushed and the workflow won't run
+> (in that case, `git push origin v0.2.0` explicitly).
 
 Versions must be **new** (npm and the Marketplace reject duplicates), so always
 bump before tagging. Watch the run under the repo's **Actions** tab.

@@ -28,5 +28,6 @@ for (const file of files) {
 }
 
 console.log(`\nSet ${files.length} packages to ${version}. Next:`);
-console.log(`  git commit -am "release: v${version}" && git tag v${version}`);
+console.log(`  git commit -am "release: v${version}"`);
+console.log(`  git tag -a v${version} -m "v${version}"   # annotated, so --follow-tags pushes it`);
 console.log(`  git push --follow-tags`);
