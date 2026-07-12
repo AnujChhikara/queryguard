@@ -1,5 +1,23 @@
 import { describe, it, expect } from "vitest";
+import { parseKnowledge } from "@queryguard/core";
 import { toVsDiagnostics } from "../src/analyze.js";
+
+const KNOWLEDGE = parseKnowledge(
+  `version: 1
+tables:
+  user:
+    rows: 10000
+    filters:
+      - when: { status: active }
+        rows: 10
+`,
+  "/p",
+);
+
+const SMALL_LOOP = `async function r(prisma){
+  const active = await prisma.user.findMany({ where: { status: "active" } });
+  for (const u of active) { await prisma.post.findMany({ where: { authorId: u.id } }); }
+}`;
 
 const N_PLUS_ONE = `
 const users = await prisma.user.findMany({ where: { active: true } })
@@ -29,5 +47,13 @@ describe("toVsDiagnostics", () => {
   it("returns [] for malformed code instead of throwing", () => {
     expect(() => toVsDiagnostics(BROKEN, "broken.ts")).not.toThrow();
     expect(toVsDiagnostics(BROKEN, "broken.ts")).toEqual([]);
+  });
+
+  it("flags n-plus-one over an untraceable set without knowledge", () => {
+    expect(toVsDiagnostics(SMALL_LOOP, "a.ts").some((d) => d.ruleId === "n-plus-one")).toBe(true);
+  });
+
+  it("silences n-plus-one when knowledge proves the driving set small", () => {
+    expect(toVsDiagnostics(SMALL_LOOP, "a.ts", KNOWLEDGE).some((d) => d.ruleId === "n-plus-one")).toBe(false);
   });
 });
