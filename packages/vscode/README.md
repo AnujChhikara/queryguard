@@ -11,6 +11,7 @@ in TypeScript/JavaScript **as you type**. Powered by the `@cardinal/core` engine
 - **over-fetch** — an unfiltered read on a large table with a selective alternative.
 - **order-by-rand** — `ORDER BY RAND()`/`RANDOM()` (full sort, no index).
 - **leading-wildcard-like** — `LIKE '%…'` (non-sargable, full scan).
+- **excessive-joins** — a query joining many tables (counted by a real SQL parser).
 
 Adapters: **Prisma, Drizzle, Mongoose, and raw SQL** (plus a heuristic fallback).
 

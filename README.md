@@ -6,11 +6,11 @@ ESLint, but specialized for the data layer. 100% static: no LLM, no network, no
 database connection; your code never leaves your machine.
 
 > **Status:** early. Today Cardinal ships a core engine, a CLI, and a VS Code
-> extension with five rules (`n-plus-one`, `unbounded-read`, `over-fetch`,
-> `order-by-rand`, `leading-wildcard-like`), adapters for **Prisma, Drizzle,
-> Mongoose, and raw SQL** (plus a heuristic fallback), an optional **knowledge
-> file** that makes the rules scale-aware, and a **config file** to tune them.
-> See [Roadmap](#roadmap) for what's next.
+> extension with six rules (`n-plus-one`, `unbounded-read`, `over-fetch`,
+> `order-by-rand`, `leading-wildcard-like`, `excessive-joins`), adapters for
+> **Prisma, Drizzle, Mongoose, and raw SQL** (the last parsed with a real SQL
+> parser), an optional **knowledge file** that makes the rules scale-aware, and a
+> **config file** to tune them. See [Roadmap](#roadmap) for what's next.
 
 ## What's here
 

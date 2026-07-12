@@ -9,6 +9,7 @@ import { unboundedReadRule } from "./rules/unbounded-read.js";
 import { overFetchRule } from "./rules/over-fetch.js";
 import { orderByRandRule } from "./rules/order-by-rand.js";
 import { leadingWildcardLikeRule } from "./rules/leading-wildcard-like.js";
+import { excessiveJoinsRule } from "./rules/excessive-joins.js";
 import { estimateCardinality } from "./knowledge/cardinality.js";
 import { resolveDrivingSet } from "./knowledge/driving-set.js";
 import { readInlineHint } from "./knowledge/hints.js";
@@ -26,6 +27,7 @@ const rules: Rule[] = [
   overFetchRule,
   orderByRandRule,
   leadingWildcardLikeRule,
+  excessiveJoinsRule,
 ];
 
 export function analyzeSource(

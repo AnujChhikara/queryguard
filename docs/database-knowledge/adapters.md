@@ -50,7 +50,12 @@ and `unbounded-read` fire structurally; nothing is silenced on a guess.
   calls whose first argument is a string or template literal. A
   `db.execute(sql`...`)` reports once (the call form wins; the inner template is
   skipped) to avoid double-counting.
-- **SQL read is regex-thin, not a parser:** leading keyword →
+- **Structural signals use a real SQL parser** (`node-sql-parser`): JOIN clauses
+  are counted from the AST (feeding `excessive-joins`), accurate where a regex
+  would miscount JOINs inside comments or string literals. Parse failures (exotic
+  dialects, unresolved `${…}` interpolations) fall back to 0 — never a false
+  finding.
+- **Operation/target/filter/limit are still regex-thin:** leading keyword →
   `operation` (SELECT/WITH→read, INSERT/UPDATE→write, DELETE→delete); first table
   after `FROM`/`INTO`/`UPDATE` → `target`; `\bWHERE\b`/`\bLIMIT\b` →
   `hasFilter`/`hasLimit`; `COUNT(`/`SUM(`/… → `isAggregate`. Unrecognized text

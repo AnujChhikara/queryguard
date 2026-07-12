@@ -93,6 +93,13 @@ describe("analyzeSource across adapters", () => {
     const like = analyzeSource("async function r(sql){ await sql`SELECT id FROM users WHERE email LIKE '%@x.com'`; }");
     expect(like.some((d) => d.ruleId === "leading-wildcard-like")).toBe(true);
   });
+
+  it("flags excessive-joins via the SQL parser", () => {
+    const diags = analyzeSource(
+      "async function r(sql){ await sql`SELECT * FROM a JOIN b ON a.id=b.a JOIN c ON b.id=c.b JOIN d ON c.id=d.c JOIN e ON d.id=e.d JOIN f ON e.id=f.e`; }",
+    );
+    expect(diags.some((d) => d.ruleId === "excessive-joins")).toBe(true);
+  });
 });
 
 describe("analyzeSource with config", () => {

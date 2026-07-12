@@ -16,6 +16,8 @@ export interface SqlFlags {
   orderByRand: boolean;
   /** LIKE/ILIKE with a leading '%' wildcard — non-sargable. */
   leadingWildcardLike: boolean;
+  /** JOIN clauses counted via the SQL parser (0 if none or unparseable). */
+  joinCount: number;
 }
 
 export interface SourceRange {

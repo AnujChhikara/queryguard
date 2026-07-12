@@ -12,6 +12,8 @@ export * from "./rules/unbounded-read.js";
 export * from "./rules/over-fetch.js";
 export * from "./rules/order-by-rand.js";
 export * from "./rules/leading-wildcard-like.js";
+export * from "./rules/excessive-joins.js";
+export * from "./sql/parse.js";
 export * from "./engine.js";
 export * from "./config.js";
 export * from "./knowledge/load.js";
