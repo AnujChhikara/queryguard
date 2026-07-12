@@ -122,7 +122,8 @@ node packages/cli/dist/bin.js suppress "src/contacts.ts:42" --reason "list is ad
 
 This appends an entry to the knowledge file matched by rule + enclosing function +
 the normalized call text (never the line number, so it survives edits above the
-call). Run it without `--reason` for an interactive prompt. Full details:
+call). Run it without `--reason` for an interactive prompt. In the VS Code
+extension the same flow is a lightbulb quick-fix on any Cardinal squiggle. Full details:
 [`docs/database-knowledge/business-logic-context.md`](docs/database-knowledge/business-logic-context.md).
 
 ## How it works

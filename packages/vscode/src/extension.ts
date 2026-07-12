@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { dirname } from "node:path";
 import { toVsDiagnostics, type MappedDiagnostic } from "./analyze.js";
 import { KnowledgeCache } from "./knowledge-cache.js";
+import { performSuppression, type SuppressIO } from "./suppress-action.js";
 
 const TARGET_LANGUAGES = new Set([
   "typescript",
@@ -11,6 +12,41 @@ const TARGET_LANGUAGES = new Set([
 ]);
 
 const DEBOUNCE_MS = 300;
+const SUPPRESS_COMMAND = "cardinal.suppress";
+
+interface SuppressArgs {
+  uri: string;
+  ruleId: string;
+  line: number;
+}
+
+/** Offers a "Suppress …" quick-fix on each Cardinal diagnostic under the cursor. */
+class SuppressProvider implements vscode.CodeActionProvider {
+  static readonly providedCodeActionKinds = [vscode.CodeActionKind.QuickFix];
+
+  provideCodeActions(
+    document: vscode.TextDocument,
+    _range: vscode.Range,
+    context: vscode.CodeActionContext,
+  ): vscode.CodeAction[] {
+    return context.diagnostics
+      .filter((d) => d.source === "cardinal" && typeof d.code === "string")
+      .map((d) => {
+        const action = new vscode.CodeAction(
+          `Suppress "${String(d.code)}" (Cardinal)`,
+          vscode.CodeActionKind.QuickFix,
+        );
+        action.diagnostics = [d];
+        const args: SuppressArgs = {
+          uri: document.uri.toString(),
+          ruleId: String(d.code),
+          line: d.range.start.line + 1, // vscode 0-based → core 1-based
+        };
+        action.command = { command: SUPPRESS_COMMAND, title: "Suppress finding", arguments: [args] };
+        return action;
+      });
+  }
+}
 
 function toSeverity(s: MappedDiagnostic["severity"]): vscode.DiagnosticSeverity {
   if (s === "error") return vscode.DiagnosticSeverity.Error;
@@ -75,6 +111,53 @@ export function activate(context: vscode.ExtensionContext): void {
   watcher.onDidCreate(refreshKnowledge);
   watcher.onDidDelete(refreshKnowledge);
   context.subscriptions.push(watcher);
+
+  // Suppression quick-fix: lightbulb on a Cardinal diagnostic → write a
+  // suppression (and optional cardinality fact) to the knowledge file.
+  async function runSuppress(args: SuppressArgs): Promise<void> {
+    const uri = vscode.Uri.parse(args.uri);
+    const doc = await vscode.workspace.openTextDocument(uri);
+    const io: SuppressIO = {
+      askReason: async () =>
+        vscode.window.showInputBox({
+          title: "Suppress finding",
+          prompt: "Why are you suppressing this? (optional)",
+          placeHolder: "e.g. this list is admin-curated and capped at 20",
+        }),
+      confirmFact: async (table, rows) =>
+        (await vscode.window.showInformationMessage(
+          `Also record fact: tables.${table}.rows = ${rows}?`,
+          "Record",
+          "Skip",
+        )) === "Record",
+    };
+    const res = await performSuppression(
+      {
+        code: doc.getText(),
+        absPath: doc.fileName,
+        relPath: vscode.workspace.asRelativePath(uri, false),
+        line: args.line,
+        ruleId: args.ruleId,
+        workspaceRoot: vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath,
+      },
+      io,
+    );
+    if (res.ok) {
+      refreshKnowledge();
+      void vscode.window.showInformationMessage(`Cardinal: ${res.message}`);
+    } else if (res.error !== "cancelled") {
+      void vscode.window.showWarningMessage(`Cardinal: ${res.error}`);
+    }
+  }
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(SUPPRESS_COMMAND, runSuppress),
+    vscode.languages.registerCodeActionsProvider(
+      [...TARGET_LANGUAGES].map((language) => ({ language })),
+      new SuppressProvider(),
+      { providedCodeActionKinds: SuppressProvider.providedCodeActionKinds },
+    ),
+  );
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((e) => scheduleAnalyze(e.document)),
