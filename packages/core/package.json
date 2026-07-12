@@ -1,6 +1,6 @@
 {
   "name": "cardinal-core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Static, database-aware analysis engine for TypeScript/JavaScript — detects N+1 loops, unbounded reads, and over-fetching. Powers the Cardinal CLI and VS Code extension.",
   "keywords": [
     "linter",
