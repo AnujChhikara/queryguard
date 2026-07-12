@@ -6,12 +6,30 @@
   "publisher": "anujchhikara",
   "license": "MIT",
   "icon": "icon.png",
-  "categories": ["Linters", "Programming Languages"],
-  "keywords": ["n+1", "prisma", "drizzle", "mongoose", "sql", "database", "linter"],
+  "categories": [
+    "Linters",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "n+1",
+    "prisma",
+    "drizzle",
+    "mongoose",
+    "sql",
+    "database",
+    "linter"
+  ],
   "homepage": "https://github.com/AnujChhikara/cardinal#readme",
-  "repository": { "type": "git", "url": "https://github.com/AnujChhikara/cardinal" },
-  "bugs": { "url": "https://github.com/AnujChhikara/cardinal/issues" },
-  "engines": { "vscode": "^1.85.0" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AnujChhikara/cardinal"
+  },
+  "bugs": {
+    "url": "https://github.com/AnujChhikara/cardinal/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
   "main": "./dist/extension.js",
   "activationEvents": [
     "onLanguage:typescript",
@@ -42,7 +60,7 @@
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",
-    "@vscode/vsce": "^2.24.0",
+    "@vscode/vsce": "^3.9.2",
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",
     "vitest": "^2.0.0"

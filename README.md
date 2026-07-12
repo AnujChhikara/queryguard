@@ -1,5 +1,10 @@
 # Cardinal
 
+[![npm](https://img.shields.io/npm/v/cardinal-cli?label=cardinal-cli)](https://www.npmjs.com/package/cardinal-cli)
+[![Open VSX](https://img.shields.io/open-vsx/v/anujchhikara/cardinal-vscode?label=Open%20VSX)](https://open-vsx.org/extension/anujchhikara/cardinal-vscode)
+[![CI](https://github.com/AnujChhikara/cardinal/actions/workflows/ci.yml/badge.svg)](https://github.com/AnujChhikara/cardinal/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **A database-aware static analyzer for TypeScript/JavaScript.** It flags
 inefficient database access — N+1 loops, over-fetching, unbounded fan-out — like
 ESLint, but specialized for the data layer. 100% static: no LLM, no network, no

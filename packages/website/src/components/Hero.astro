@@ -1,5 +1,6 @@
 ---
 const repo = "https://github.com/AnujChhikara/cardinal";
+const openvsx = "https://open-vsx.org/extension/anujchhikara/cardinal-vscode";
 
 // Rendered with set:html so the braces in the code aren't parsed as Astro expressions.
 const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users = <span class="kw">await</span> prisma.user.findMany()
@@ -26,7 +27,7 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
           View on GitHub
           <span aria-hidden="true">→</span>
         </a>
-        <span class="soon">VS&nbsp;Code extension coming soon</span>
+        <a class="soon soon--link" href={openvsx}>Editor extension on Open&nbsp;VSX →</a>
       </div>
       <p class="install"><span class="dollar">$</span> npm i -D cardinal-cli</p>
     </div>
@@ -82,6 +83,14 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--muted);
+  }
+  .soon--link {
+    text-decoration: none;
+    border-bottom: 1.5px solid var(--marker);
+    padding-bottom: 2px;
+  }
+  .soon--link:hover {
+    color: var(--ink);
   }
   .install {
     display: inline-block;
