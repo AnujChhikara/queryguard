@@ -1,5 +1,6 @@
 # Cardinal
 
+[![VS Marketplace](https://img.shields.io/visual-studio-marketplace/v/anujchhikara.cardinal-vscode?label=VS%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=anujchhikara.cardinal-vscode)
 [![npm](https://img.shields.io/npm/v/cardinal-cli?label=cardinal-cli)](https://www.npmjs.com/package/cardinal-cli)
 [![Open VSX](https://img.shields.io/open-vsx/v/anujchhikara/cardinal-vscode?label=Open%20VSX)](https://open-vsx.org/extension/anujchhikara/cardinal-vscode)
 [![CI](https://github.com/AnujChhikara/cardinal/actions/workflows/ci.yml/badge.svg)](https://github.com/AnujChhikara/cardinal/actions/workflows/ci.yml)
@@ -39,8 +40,9 @@ pnpm build        # builds all packages
 pnpm test         # builds, then runs the full suite
 ```
 
-> **Install:** coming soon to the VS Code Marketplace and npm
-> (`cardinal-cli`). Until then, build from source as above.
+> **Install:** the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=anujchhikara.cardinal-vscode)
+> (also on [Open VSX](https://open-vsx.org/extension/anujchhikara/cardinal-vscode)
+> for Cursor / VSCodium), or the CLI with `npm i -D cardinal-cli` → `npx cardinal`.
 
 ## Using the CLI
 

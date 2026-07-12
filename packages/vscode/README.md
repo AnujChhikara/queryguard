@@ -33,5 +33,10 @@ normalized call text (not line number, so it survives edits above the call).
 
 ## Usage
 
-Install the `.vsix`, then open a `.ts`/`.js`/`.tsx`/`.jsx` file. Problems appear
-as squiggles and in the Problems panel, updating ~300ms after you stop typing.
+Install from the Extensions panel (search **Cardinal**), then open a
+`.ts`/`.js`/`.tsx`/`.jsx` file. Problems appear as squiggles and in the Problems
+panel, updating ~300ms after you stop typing.
+
+Pairs with the [`cardinal-cli`](https://www.npmjs.com/package/cardinal-cli)
+command-line linter for CI gates, sharing the same engine and
+`cardinal.knowledge.yaml` / `cardinal.config` files.

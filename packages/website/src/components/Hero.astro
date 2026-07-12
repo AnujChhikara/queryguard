@@ -1,5 +1,6 @@
 ---
 const repo = "https://github.com/AnujChhikara/cardinal";
+const marketplace = "https://marketplace.visualstudio.com/items?itemName=anujchhikara.cardinal-vscode";
 const openvsx = "https://open-vsx.org/extension/anujchhikara/cardinal-vscode";
 
 // Rendered with set:html so the braces in the code aren't parsed as Astro expressions.
@@ -23,12 +24,13 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
         connection; your code never leaves your machine.
       </p>
       <div class="actions">
-        <a class="btn btn--primary" href={repo}>
-          View on GitHub
+        <a class="btn btn--primary" href={marketplace}>
+          Install for VS&nbsp;Code
           <span aria-hidden="true">→</span>
         </a>
-        <a class="soon soon--link" href={openvsx}>Editor extension on Open&nbsp;VSX →</a>
+        <a class="btn" href={repo}>View on GitHub</a>
       </div>
+      <a class="soon soon--link" href={openvsx}>Also on Open&nbsp;VSX — Cursor &amp; VSCodium →</a>
       <p class="install"><span class="dollar">$</span> npm i -D cardinal-cli</p>
     </div>
 
@@ -85,6 +87,8 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
     color: var(--muted);
   }
   .soon--link {
+    display: inline-block;
+    margin-top: 1.4rem;
     text-decoration: none;
     border-bottom: 1.5px solid var(--marker);
     padding-bottom: 2px;
