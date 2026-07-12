@@ -2,6 +2,7 @@ import { parseSource, findQueryCandidates } from "./parse.js";
 import { prismaAdapter } from "./adapters/prisma.js";
 import { drizzleAdapter } from "./adapters/drizzle.js";
 import { mongooseAdapter } from "./adapters/mongoose.js";
+import { rawSqlAdapter } from "./adapters/raw-sql.js";
 import { heuristicAdapter } from "./adapters/heuristic.js";
 import { nPlusOneRule } from "./rules/n-plus-one.js";
 import { unboundedReadRule } from "./rules/unbounded-read.js";
@@ -14,7 +15,7 @@ import type { Knowledge, Cardinality } from "./knowledge/types.js";
 import type { Diagnostic, QueryDescriptor, Rule } from "./types.js";
 import type { Node } from "ts-morph";
 
-const adapters: Array<(node: Node) => QueryDescriptor | null> = [prismaAdapter, drizzleAdapter, mongooseAdapter, heuristicAdapter];
+const adapters: Array<(node: Node) => QueryDescriptor | null> = [prismaAdapter, drizzleAdapter, mongooseAdapter, rawSqlAdapter, heuristicAdapter];
 const rules: Rule[] = [nPlusOneRule, unboundedReadRule, overFetchRule];
 
 export function analyzeSource(

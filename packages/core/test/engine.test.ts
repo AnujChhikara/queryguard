@@ -52,6 +52,41 @@ describe("analyzeSource", () => {
   });
 });
 
+describe("analyzeSource across adapters", () => {
+  it("flags an unbounded-read on a Drizzle relational read", () => {
+    const diags = analyzeSource(`async function r(db){ return db.query.users.findMany(); }`);
+    expect(diags.some((d) => d.ruleId === "unbounded-read")).toBe(true);
+  });
+
+  it("flags n-plus-one (error) for a Mongoose query in a loop", () => {
+    const diags = analyzeSource(
+      `async function r(ids){ for (const id of ids){ await User.findById(id); } }`,
+    );
+    const np = diags.filter((d) => d.ruleId === "n-plus-one");
+    expect(np).toHaveLength(1);
+    expect(np[0].severity).toBe("error");
+  });
+
+  it("flags n-plus-one (error) for a raw-SQL query in a loop", () => {
+    const diags = analyzeSource(
+      "async function r(sql, ids){ for (const id of ids){ await sql`SELECT * FROM posts WHERE authorId = ${id}`; } }",
+    );
+    const np = diags.filter((d) => d.ruleId === "n-plus-one");
+    expect(np).toHaveLength(1);
+    expect(np[0].severity).toBe("error");
+  });
+
+  it("flags an unbounded-read on a raw-SQL SELECT without WHERE/LIMIT", () => {
+    const diags = analyzeSource("async function r(sql){ await sql`SELECT * FROM users`; }");
+    expect(diags.some((d) => d.ruleId === "unbounded-read")).toBe(true);
+  });
+
+  it("does not double-report a Drizzle-style db.execute(sql``) query", () => {
+    const diags = analyzeSource("async function r(db){ await db.execute(sql`SELECT * FROM users`); }");
+    expect(diags.filter((d) => d.ruleId === "unbounded-read")).toHaveLength(1);
+  });
+});
+
 describe("analyzeSource with knowledge", () => {
   const knowledge = parseKnowledge(
     `version: 1
