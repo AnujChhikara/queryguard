@@ -55,16 +55,35 @@ The site is a static Astro app in `packages/website`.
 
 Or from the CLI: `cd packages/website && npx vercel --prod`.
 
-## 4. Tag the release (optional)
+## Releasing new versions (automated)
+
+After the first manual publish above, **new versions ship via GitHub Actions on a
+version tag** — no hand-run publish commands. The workflow is
+`.github/workflows/release.yml`; it builds, tests, and publishes to **npm + VS
+Code Marketplace + Open VSX**, then cuts a GitHub Release with the `.vsix`.
+
+### Your release flow
 
 ```bash
-git tag v0.1.0 && git push origin v0.1.0
-gh release create v0.1.0 --generate-notes
+pnpm release:version 0.2.0        # bumps core + cli + vscode in lockstep
+git commit -am "release: v0.2.0"
+git tag v0.2.0
+git push --follow-tags            # ← the tag triggers the Release workflow
 ```
 
-## Automating later
+Versions must be **new** (npm and the Marketplace reject duplicates), so always
+bump before tagging. Watch the run under the repo's **Actions** tab.
 
-CI (build + test on every push/PR) is set up in `.github/workflows/ci.yml`. To
-automate publishing on a tag, add a release workflow that runs the commands above
-using repo **secrets** `NPM_TOKEN` and `VSCE_PAT` (Settings → Secrets and
-variables → Actions). Left manual for now so the first releases are deliberate.
+### One-time setup — three repo secrets
+
+Add these under **Settings → Secrets and variables → Actions → New repository
+secret**:
+
+| Secret | Where to get it |
+|--------|-----------------|
+| `NPM_TOKEN` | npmjs.com → avatar → **Access Tokens → Generate New Token → Granular / Automation**. Use an **Automation** token — it bypasses 2FA in CI. Give it publish access to `cardinal-core` and `cardinal-cli`. |
+| `VSCE_PAT` | Azure DevOps PAT with **Marketplace → Manage** scope (same as the manual publish). Make a fresh one for CI. |
+| `OVSX_TOKEN` | open-vsx.org → Settings → **Access Tokens**. |
+
+Once the three secrets exist, every `v*` tag publishes everywhere automatically.
+You can also trigger it manually from the **Actions** tab (workflow_dispatch).

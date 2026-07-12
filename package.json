@@ -8,7 +8,8 @@
   "scripts": {
     "test": "pnpm -r build && pnpm -r test",
     "build": "pnpm -r build",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "release:version": "node scripts/set-version.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
