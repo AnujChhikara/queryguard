@@ -86,6 +86,13 @@ describe("analyzeSource across adapters", () => {
     const diags = analyzeSource("async function r(db){ await db.execute(sql`SELECT * FROM users`); }");
     expect(diags.filter((d) => d.ruleId === "unbounded-read")).toHaveLength(1);
   });
+
+  it("flags order-by-rand and leading-wildcard-like in raw SQL", () => {
+    const rand = analyzeSource("async function r(sql){ await sql`SELECT * FROM users ORDER BY RAND() LIMIT 1`; }");
+    expect(rand.some((d) => d.ruleId === "order-by-rand")).toBe(true);
+    const like = analyzeSource("async function r(sql){ await sql`SELECT id FROM users WHERE email LIKE '%@x.com'`; }");
+    expect(like.some((d) => d.ruleId === "leading-wildcard-like")).toBe(true);
+  });
 });
 
 describe("analyzeSource with config", () => {

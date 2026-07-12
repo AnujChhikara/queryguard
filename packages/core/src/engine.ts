@@ -7,6 +7,8 @@ import { heuristicAdapter } from "./adapters/heuristic.js";
 import { nPlusOneRule } from "./rules/n-plus-one.js";
 import { unboundedReadRule } from "./rules/unbounded-read.js";
 import { overFetchRule } from "./rules/over-fetch.js";
+import { orderByRandRule } from "./rules/order-by-rand.js";
+import { leadingWildcardLikeRule } from "./rules/leading-wildcard-like.js";
 import { estimateCardinality } from "./knowledge/cardinality.js";
 import { resolveDrivingSet } from "./knowledge/driving-set.js";
 import { readInlineHint } from "./knowledge/hints.js";
@@ -18,7 +20,13 @@ import type { Diagnostic, QueryDescriptor, Rule } from "./types.js";
 import type { Node } from "ts-morph";
 
 const adapters: Array<(node: Node) => QueryDescriptor | null> = [prismaAdapter, drizzleAdapter, mongooseAdapter, rawSqlAdapter, heuristicAdapter];
-const rules: Rule[] = [nPlusOneRule, unboundedReadRule, overFetchRule];
+const rules: Rule[] = [
+  nPlusOneRule,
+  unboundedReadRule,
+  overFetchRule,
+  orderByRandRule,
+  leadingWildcardLikeRule,
+];
 
 export function analyzeSource(
   code: string,

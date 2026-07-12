@@ -9,6 +9,8 @@ in TypeScript/JavaScript **as you type**. Powered by the `@cardinal/core` engine
 - **n-plus-one** — a query awaited inside a loop or `.map`/`.forEach`/`.flatMap`.
 - **unbounded-read** — a read with no filter and no limit (may scan the table).
 - **over-fetch** — an unfiltered read on a large table with a selective alternative.
+- **order-by-rand** — `ORDER BY RAND()`/`RANDOM()` (full sort, no index).
+- **leading-wildcard-like** — `LIKE '%…'` (non-sargable, full scan).
 
 Adapters: **Prisma, Drizzle, Mongoose, and raw SQL** (plus a heuristic fallback).
 

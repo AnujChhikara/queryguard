@@ -6,6 +6,8 @@ import { isInsideLoop } from "../loop.js";
 const SQL_CALL_METHODS = new Set(["query", "execute", "raw"]);
 const LEADING_KEYWORD = /^[\s`'"(]*(SELECT|WITH|INSERT|UPDATE|DELETE)\b/i;
 const AGGREGATE_FN = /\b(COUNT|SUM|AVG|MIN|MAX)\s*\(/i;
+const ORDER_BY_RAND = /\bORDER\s+BY\s+(RAND|RANDOM)\s*\(\s*\)/i;
+const LEADING_WILDCARD_LIKE = /\bI?LIKE\s+'%/i;
 
 interface SqlFacts {
   operation: QueryDescriptor["operation"];
@@ -13,6 +15,7 @@ interface SqlFacts {
   hasFilter: boolean;
   hasLimit: boolean;
   isAggregate: boolean;
+  sqlFlags: { orderByRand: boolean; leadingWildcardLike: boolean };
 }
 
 /** Thin, regex-level read of a SQL string. Returns null if it isn't SQL. */
@@ -43,6 +46,10 @@ function analyzeSql(text: string): SqlFacts | null {
     hasFilter: /\bWHERE\b/i.test(text),
     hasLimit: /\bLIMIT\b/i.test(text),
     isAggregate: operation === "read" && AGGREGATE_FN.test(text),
+    sqlFlags: {
+      orderByRand: ORDER_BY_RAND.test(text),
+      leadingWildcardLike: LEADING_WILDCARD_LIKE.test(text),
+    },
   };
 }
 
@@ -66,6 +73,7 @@ function descriptor(node: TsNode, facts: SqlFacts): QueryDescriptor {
     hasLimit: facts.hasLimit,
     hasFilter: facts.hasFilter,
     isAggregate: facts.isAggregate,
+    sqlFlags: facts.sqlFlags,
   };
 }
 

@@ -11,6 +11,13 @@ export interface QueryFilter {
   kind: "eq" | "in" | "other";
 }
 
+export interface SqlFlags {
+  /** ORDER BY RAND()/RANDOM() — full sort, no index. */
+  orderByRand: boolean;
+  /** LIKE/ILIKE with a leading '%' wildcard — non-sargable. */
+  leadingWildcardLike: boolean;
+}
+
 export interface SourceRange {
   start: number;
   end: number;
@@ -36,6 +43,8 @@ export interface QueryDescriptor {
   hasFilter?: boolean;
   filters?: QueryFilter[];
   isAggregate?: boolean;
+  /** Raw-SQL-only signals consumed by SQL-specific rules. */
+  sqlFlags?: SqlFlags;
   node: Node;
   inLoop: boolean;
   awaited: boolean;
