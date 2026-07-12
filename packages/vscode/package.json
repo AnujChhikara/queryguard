@@ -5,6 +5,7 @@
   "version": "0.1.0",
   "publisher": "anujchhikara",
   "license": "MIT",
+  "icon": "icon.png",
   "categories": ["Linters", "Programming Languages"],
   "keywords": ["n+1", "prisma", "drizzle", "mongoose", "sql", "database", "linter"],
   "homepage": "https://github.com/AnujChhikara/cardinal#readme",

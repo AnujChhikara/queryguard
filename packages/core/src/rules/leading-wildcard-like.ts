@@ -14,7 +14,7 @@ export const leadingWildcardLikeRule: Rule = {
           message:
             "LIKE with a leading '%' wildcard can't use an index and scans the whole table. Anchor the pattern (e.g. 'abc%') or use a full-text search index for contains-style matches.",
           node: d.node,
-          docsUrl: "https://cardinal.dev/rules/leading-wildcard-like",
+          docsUrl: "https://github.com/AnujChhikara/cardinal#leading-wildcard-like",
         }),
       );
   },

@@ -14,7 +14,7 @@ export const orderByRandRule: Rule = {
           message:
             "ORDER BY RAND() sorts the entire result set and can't use an index — it gets slower as the table grows. For a random row, prefer a keyed lookup on a random id or a random OFFSET.",
           node: d.node,
-          docsUrl: "https://cardinal.dev/rules/order-by-rand",
+          docsUrl: "https://github.com/AnujChhikara/cardinal#order-by-rand",
         }),
       );
   },

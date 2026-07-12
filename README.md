@@ -31,8 +31,11 @@ This is a pnpm monorepo:
 ```bash
 pnpm install
 pnpm build        # builds all packages
-pnpm test         # builds, then runs the full suite (18 tests)
+pnpm test         # builds, then runs the full suite
 ```
+
+> **Install:** coming soon to the VS Code Marketplace and npm
+> (`@cardinal/cli`). Until then, build from source as above.
 
 ## Using the CLI
 
@@ -55,7 +58,7 @@ Create a file with an N+1 pattern:
 
 ```ts
 // bad.ts
-const users = await prisma.user.findMany()
+const users = await prisma.user.findMany({ where: { active: true } })
 for (const user of users) {
   const posts = await prisma.post.findMany({ where: { authorId: user.id } })
 }
@@ -79,8 +82,40 @@ The fix (single query, no loop) reports zero problems and exits `0`:
 
 ```ts
 // good.ts
-const users = await prisma.user.findMany({ include: { posts: true } })
+const users = await prisma.user.findMany({ where: { active: true }, include: { posts: true } })
 ```
+
+For a fuller tour across Prisma, Drizzle, Mongoose, and raw SQL, run the CLI on
+[`examples/anti-patterns.ts`](examples/anti-patterns.ts).
+
+## Rules
+
+Every diagnostic links here. Severities are defaults — override any of them (or
+turn a rule off) with a [config file](#configuration).
+
+### n-plus-one
+A query awaited inside a loop (`for`, `while`, `.map`/`.forEach`/`.flatMap`) — 1 + N
+round trips. With a knowledge file, provably-small loops are silenced and
+provably-large fan-out is escalated. **error** (high-confidence adapters).
+
+### unbounded-read
+A read with no filter and no limit — it may scan the whole table. **warning**.
+
+### over-fetch
+An unfiltered read on a table the knowledge file marks *large*, when a selective
+filter would return far fewer rows. Requires a knowledge file. **warning**.
+
+### order-by-rand
+`ORDER BY RAND()` / `RANDOM()` — sorts the entire result set and can't use an
+index. **warning**.
+
+### leading-wildcard-like
+`LIKE '%…'` / `ILIKE '%…'` — a leading wildcard is non-sargable (full scan).
+**warning**.
+
+### excessive-joins
+A query joining many tables (JOINs counted by a real SQL parser). Large join
+fan-out is hard on the planner. **warning**.
 
 ## Business-logic context
 
@@ -165,11 +200,13 @@ Rule-authoring reference: [`docs/database-knowledge/`](docs/database-knowledge/)
 
 ## Roadmap
 
-- VS Code extension (`@cardinal/vscode`) — live squiggles + hovers, sharing this engine.
-- More Lane 1/2/3 rules: missing limit, and Lane 2 engine-specific limits.
-- Deepen the newer adapters: predicate-value extraction (unlocks `over-fetch`/cardinality beyond Prisma), Drizzle's chained query builder, and a real SQL parser.
-- More engines (MySQL/PlanetScale/Postgres) and more data layers (TypeORM, Kysely).
-- Config (`cardinal.config.ts`): enable/disable rules, severity overrides.
+- More parser-backed SQL rules: subqueries, `HAVING`/`GROUP BY` misuse, `SELECT *`.
+- Deepen the newer adapters: predicate-value extraction (unlocks `over-fetch` /
+  cardinality beyond Prisma) and Drizzle's chained query builder.
+- More engines (MySQL/PlanetScale/Postgres limits) and data layers (TypeORM, Kysely).
+- Ship: publish to the VS Code Marketplace + npm, deploy the site.
+
+See [`LAUNCH.md`](LAUNCH.md) for the v0 release checklist.
 
 ## License
 

@@ -19,7 +19,7 @@ export const unboundedReadRule: Rule = {
           severity: "warning",
           message: `Read on "${d.target}" has no filter and no limit — this may scan the whole table. Add a WHERE/where or a LIMIT/take.`,
           node: d.node,
-          docsUrl: "https://cardinal.dev/rules/unbounded-read",
+          docsUrl: "https://github.com/AnujChhikara/cardinal#unbounded-read",
         }),
       );
   },

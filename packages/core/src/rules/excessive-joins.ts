@@ -16,7 +16,7 @@ export const excessiveJoinsRule: Rule = {
           severity: "warning",
           message: `Query joins ${d.sqlFlags!.joinCount + 1} tables (${d.sqlFlags!.joinCount} JOINs). Large join fan-out is hard for the planner and often signals a query doing too much — consider splitting it or denormalizing a hot path.`,
           node: d.node,
-          docsUrl: "https://cardinal.dev/rules/excessive-joins",
+          docsUrl: "https://github.com/AnujChhikara/cardinal#excessive-joins",
         }),
       );
   },

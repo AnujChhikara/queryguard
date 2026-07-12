@@ -1,3 +1,5 @@
+icon.svg
+.vscodeignore
 src/**
 test/**
 tsconfig.json
