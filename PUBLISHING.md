@@ -3,24 +3,23 @@
 Everything here needs **your** accounts/tokens, so it's a manual checklist rather
 than automation. All packages are at `0.1.0`. Build first: `pnpm build`.
 
-## 1. npm — `@cardinal/core` and `@cardinal/cli`
+## 1. npm — `cardinal-core` and `cardinal-cli`
 
-The packages are scoped to `@cardinal`, so you need an npm **organization** named
-`cardinal` (free for public packages: npmjs.com → *Add Organization*). Both
-manifests already set `"publishConfig": { "access": "public" }`.
+Unscoped package names — no npm organization required; they publish under your
+account. Both manifests set `"publishConfig": { "access": "public" }`.
 
 ```bash
-npm login                       # your npm account, a member of the `cardinal` org
+npm login                       # your npm account (2FA)
 pnpm build                      # produces dist/ for both packages
 
 # Publish core FIRST (cli depends on it):
-pnpm --filter @cardinal/core publish
-pnpm --filter @cardinal/cli  publish
+pnpm --filter cardinal-core publish
+pnpm --filter cardinal-cli  publish
 ```
 
-Use **`pnpm publish`** (not `npm publish`) — it rewrites `@cardinal/core:
+Use **`pnpm publish`** (not `npm publish`) — it rewrites `cardinal-core:
 workspace:*` in the CLI to the real `0.1.0` on publish. Verify with
-`npm view @cardinal/cli`, then `npx @cardinal/cli "src/**/*.ts"`.
+`npm view cardinal-cli`, then `npx cardinal-cli "src/**/*.ts"`.
 
 ## 2. VS Code Marketplace — the extension
 
@@ -41,7 +40,7 @@ npx vsce publish                # or: npx vsce publish --packagePath cardinal.vs
 Optional: also publish to **Open VSX** (for Cursor/VSCodium) with
 `npx ovsx publish cardinal.vsix -p <openvsx-token>`.
 
-> Note: the `.vsix` bundles `@cardinal/core` (via tsup), so the extension does
+> Note: the `.vsix` bundles `cardinal-core` (via tsup), so the extension does
 > **not** depend on the npm publish above — you can ship it independently.
 
 ## 3. Website — Vercel

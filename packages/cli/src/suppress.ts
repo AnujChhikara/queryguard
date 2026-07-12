@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join, isAbsolute } from "node:path";
-import { buildSuppressPlan, addSuppression, addFact, discoverKnowledge, loadKnowledge } from "@cardinal/core";
-import type { Knowledge } from "@cardinal/core";
+import { buildSuppressPlan, addSuppression, addFact, discoverKnowledge, loadKnowledge } from "cardinal-core";
+import type { Knowledge } from "cardinal-core";
 
 export interface SuppressOptions {
   reason?: string;

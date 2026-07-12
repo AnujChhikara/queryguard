@@ -1,4 +1,4 @@
-# @cardinal/cli
+# cardinal-cli
 
 The command-line linter for [Cardinal](https://github.com/AnujChhikara/cardinal)
 — a static, database-aware analyzer for TypeScript/JavaScript. Flags N+1 loops,
@@ -6,7 +6,7 @@ unbounded reads, and over-fetching, and exits non-zero on any error (so it gates
 CI).
 
 ```bash
-npm i -D @cardinal/cli
+npm i -D cardinal-cli
 npx cardinal "src/**/*.ts"
 ```
 

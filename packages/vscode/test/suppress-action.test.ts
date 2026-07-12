@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { parseKnowledge } from "@cardinal/core";
+import { parseKnowledge } from "cardinal-core";
 import { performSuppression } from "../src/suppress-action.js";
 
 let dir: string;

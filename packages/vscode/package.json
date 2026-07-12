@@ -38,7 +38,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@cardinal/core": "workspace:*"
+    "cardinal-core": "workspace:*"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",

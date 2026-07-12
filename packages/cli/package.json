@@ -1,5 +1,5 @@
 {
-  "name": "@cardinal/cli",
+  "name": "cardinal-cli",
   "version": "0.1.0",
   "description": "Cardinal CLI — a static, database-aware linter for TypeScript/JavaScript. Flags N+1 loops, unbounded reads, and over-fetching, with a CI-friendly exit code.",
   "keywords": ["linter", "cli", "n+1", "prisma", "drizzle", "mongoose", "sql", "database", "ci"],
@@ -18,7 +18,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@cardinal/core": "workspace:*",
+    "cardinal-core": "workspace:*",
     "fast-glob": "^3.3.0"
   }
 }

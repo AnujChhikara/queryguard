@@ -1,4 +1,4 @@
-import { discoverConfig, type CardinalConfig } from "@cardinal/core";
+import { discoverConfig, type CardinalConfig } from "cardinal-core";
 
 /**
  * Caches config-file discovery by directory, mirroring KnowledgeCache. Keeps the

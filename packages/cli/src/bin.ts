@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { discoverKnowledge, loadKnowledge, discoverConfig } from "@cardinal/core";
-import type { Knowledge, CardinalConfig } from "@cardinal/core";
+import { discoverKnowledge, loadKnowledge, discoverConfig } from "cardinal-core";
+import type { Knowledge, CardinalConfig } from "cardinal-core";
 import { run } from "./run.js";
 
 function parseArgs(argv: string[]): {

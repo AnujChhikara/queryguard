@@ -6,7 +6,7 @@ import {
   addSuppression,
   addFact,
   type Knowledge,
-} from "@cardinal/core";
+} from "cardinal-core";
 
 const KNOWLEDGE_NAMES = [
   "cardinal.knowledge.yaml",

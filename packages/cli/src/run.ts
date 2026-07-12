@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import fg from "fast-glob";
-import { analyzeSource } from "@cardinal/core";
-import type { Diagnostic, Knowledge, CardinalConfig } from "@cardinal/core";
+import { analyzeSource } from "cardinal-core";
+import type { Diagnostic, Knowledge, CardinalConfig } from "cardinal-core";
 
 export interface FileDiagnostic extends Diagnostic {
   file: string;

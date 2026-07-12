@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { discoverKnowledge, discoverConfig } from "@cardinal/core";
+import { discoverKnowledge, discoverConfig } from "cardinal-core";
 import { run } from "../src/run.js";
 
 const here = dirname(fileURLToPath(import.meta.url));

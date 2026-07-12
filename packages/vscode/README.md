@@ -1,7 +1,7 @@
 # Cardinal for VS Code
 
 Flags inefficient database access — N+1 loops, unbounded reads, over-fetching —
-in TypeScript/JavaScript **as you type**. Powered by the `@cardinal/core` engine
+in TypeScript/JavaScript **as you type**. Powered by the `cardinal-core` engine
 (100% static: no LLM, no network, no database connection).
 
 ## What it flags

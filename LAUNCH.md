@@ -86,17 +86,17 @@ full sequence with the testing steps.
 
 ---
 
-## 4. Publish — npm (`@cardinal/core`, `@cardinal/cli`)
+## 4. Publish — npm (`cardinal-core`, `cardinal-cli`)
 
-- [ ] Create the npm **organization** `cardinal` (npmjs.com → Add Organization;
-      free for public packages).
-- [ ] `npm login` (enable 2FA).
+Unscoped names — no org needed; they publish under your account.
+
+- [ ] `npm login` (2FA enabled).
 - [ ] `pnpm build` (fresh `dist/`).
-- [ ] `pnpm --filter @cardinal/core publish` (**core first** — cli depends on it;
+- [ ] `pnpm --filter cardinal-core publish` (**core first** — cli depends on it;
       `pnpm publish` rewrites `workspace:*` → `0.1.0`).
-- [ ] `pnpm --filter @cardinal/cli publish`.
-- [ ] Verify: `npm view @cardinal/cli`, then in a scratch dir
-      `npm i -D @cardinal/cli && npx cardinal "**/*.ts"`.
+- [ ] `pnpm --filter cardinal-cli publish`.
+- [ ] Verify: `npm view cardinal-cli`, then in a scratch dir
+      `npm i -D cardinal-cli && npx cardinal "**/*.ts"`.
 
 ---
 
@@ -117,7 +117,7 @@ full sequence with the testing steps.
 ## 6. Deploy — website (Vercel)
 
 - [ ] After npm + extension are live, **update the site CTA**: primary button →
-      the Marketplace listing, and add the `npm i -D @cardinal/cli` line and the
+      the Marketplace listing, and add the `npm i -D cardinal-cli` line and the
       Marketplace link. (Currently the CTA points at GitHub.)
 - [ ] Import the repo at https://vercel.com/new → set **Root Directory** =
       `packages/website` (Astro auto-detected). Deploy.

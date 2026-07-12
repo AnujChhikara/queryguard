@@ -18,8 +18,8 @@ This is a pnpm monorepo:
 
 | Package | What it does |
 |---------|--------------|
-| `@cardinal/core` | Parses TS with ts-morph, normalizes query calls into `QueryDescriptor`s, runs rules, emits diagnostics. Front-end-agnostic. |
-| `@cardinal/cli` | Globs files, runs the engine, prints diagnostics, sets the exit code (for CI gates). |
+| `cardinal-core` | Parses TS with ts-morph, normalizes query calls into `QueryDescriptor`s, runs rules, emits diagnostics. Front-end-agnostic. |
+| `cardinal-cli` | Globs files, runs the engine, prints diagnostics, sets the exit code (for CI gates). |
 
 ## Requirements
 
@@ -35,7 +35,7 @@ pnpm test         # builds, then runs the full suite
 ```
 
 > **Install:** coming soon to the VS Code Marketplace and npm
-> (`@cardinal/cli`). Until then, build from source as above.
+> (`cardinal-cli`). Until then, build from source as above.
 
 ## Using the CLI
 

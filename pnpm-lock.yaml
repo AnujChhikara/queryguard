@@ -23,7 +23,7 @@ importers:
 
   packages/cli:
     dependencies:
-      '@cardinal/core':
+      cardinal-core:
         specifier: workspace:*
         version: link:../core
       fast-glob:
@@ -44,7 +44,7 @@ importers:
 
   packages/vscode:
     dependencies:
-      '@cardinal/core':
+      cardinal-core:
         specifier: workspace:*
         version: link:../core
     devDependencies:

@@ -1,4 +1,4 @@
-import { discoverKnowledge, type Knowledge } from "@cardinal/core";
+import { discoverKnowledge, type Knowledge } from "cardinal-core";
 
 /**
  * Caches knowledge-file discovery by directory. `discoverKnowledge` walks the

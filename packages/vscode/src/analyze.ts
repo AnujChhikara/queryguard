@@ -1,4 +1,4 @@
-import { analyzeSource, type Diagnostic, type Knowledge, type CardinalConfig } from "@cardinal/core";
+import { analyzeSource, type Diagnostic, type Knowledge, type CardinalConfig } from "cardinal-core";
 
 export interface MappedDiagnostic {
   startOffset: number;

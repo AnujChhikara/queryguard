@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseKnowledge, parseConfig } from "@cardinal/core";
+import { parseKnowledge, parseConfig } from "cardinal-core";
 import { toVsDiagnostics } from "../src/analyze.js";
 
 const KNOWLEDGE = parseKnowledge(

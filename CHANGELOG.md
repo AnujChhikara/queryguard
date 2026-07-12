@@ -13,7 +13,7 @@ First release.
   anchored suppressions.
 - **Config file** (`cardinal.config.json` / `.yaml`) — per-rule severity or
   `off`.
-- **CLI** (`@cardinal/cli`) — `cardinal <glob>`, `cardinal suppress`,
+- **CLI** (`cardinal-cli`) — `cardinal <glob>`, `cardinal suppress`,
   `--knowledge` / `--no-knowledge` / `--no-config`.
 - **VS Code extension** — live diagnostics, knowledge- and config-aware, and a
   suppression quick-fix.
