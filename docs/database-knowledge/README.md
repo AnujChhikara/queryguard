@@ -26,6 +26,7 @@ Each anti-pattern has seven fields:
 
 ## Index
 
+- [`adapters.md`](adapters.md) — per-adapter detection coverage (Prisma, Drizzle, Mongoose, raw SQL, heuristic).
 - [`prisma.md`](prisma.md) — Prisma ORM query shapes + anti-patterns.
 - [`engines/mysql.md`](engines/mysql.md) — MySQL/InnoDB (stub).
 - [`engines/vitess.md`](engines/vitess.md) — Vitess / PlanetScale sharding (stub).

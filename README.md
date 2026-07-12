@@ -5,10 +5,11 @@ inefficient database access — N+1 loops, over-fetching, unbounded fan-out — 
 ESLint, but specialized for the data layer. 100% static: no LLM, no network, no
 database connection; your code never leaves your machine.
 
-> **Status:** early. Today QueryGuard ships a core engine and a CLI with three
-> rules (`n-plus-one`, `unbounded-read`, `over-fetch`), a Prisma adapter, and an
-> optional **knowledge file** that makes the rules scale-aware. The VS Code
-> extension and additional adapters are planned — see [Roadmap](#roadmap).
+> **Status:** early. Today QueryGuard ships a core engine, a CLI, and a VS Code
+> extension with three rules (`n-plus-one`, `unbounded-read`, `over-fetch`),
+> adapters for **Prisma, Drizzle, Mongoose, and raw SQL** (plus a heuristic
+> fallback), and an optional **knowledge file** that makes the rules
+> scale-aware. See [Roadmap](#roadmap) for what's next.
 
 ## What's here
 
@@ -144,7 +145,8 @@ Rule-authoring reference: [`docs/database-knowledge/`](docs/database-knowledge/)
 
 - VS Code extension (`@queryguard/vscode`) — live squiggles + hovers, sharing this engine.
 - More Lane 1/2/3 rules: missing limit, and Lane 2 engine-specific limits.
-- More adapters beyond Prisma (Drizzle, raw SQL) and more engines (MySQL/PlanetScale/Postgres).
+- Deepen the newer adapters: predicate-value extraction (unlocks `over-fetch`/cardinality beyond Prisma), Drizzle's chained query builder, and a real SQL parser.
+- More engines (MySQL/PlanetScale/Postgres) and more data layers (TypeORM, Kysely).
 - Config (`queryguard.config.ts`): enable/disable rules, severity overrides.
 
 ## License
