@@ -1,0 +1,86 @@
+---
+const items = [
+  { s: "next", t: "Config file — enable/disable rules, override severities" },
+  { s: "next", t: "Deeper adapters — predicate values, Drizzle query builder, real SQL parsing" },
+  { s: "later", t: "More engines — MySQL, Postgres, PlanetScale limits" },
+  { s: "later", t: "VS Code Marketplace release" },
+  { s: "explore", t: "Deep mode — cross-module data-flow & schema-aware checks" },
+];
+---
+
+<section class="roadmap" id="next">
+  <div class="container">
+    <p class="eyebrow">What's next</p>
+    <h2 class="title">Early, and moving.</h2>
+    <ul class="list">
+      {
+        items.map((i) => (
+          <li>
+            <span class={`badge badge--${i.s}`}>{i.s}</span>
+            <span class="text">{i.t}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .roadmap {
+    padding-block: clamp(3.5rem, 8vw, 6.5rem);
+    border-top: 1.5px solid var(--ink);
+  }
+  .title {
+    margin-top: 1.2rem;
+    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
+  }
+  .list {
+    margin: 2.4rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .list li {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    padding-block: 1.05rem;
+    border-top: 1px solid var(--grid);
+  }
+  .list li:first-child {
+    border-top: 0;
+  }
+  .badge {
+    flex: none;
+    width: 5.5rem;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25em 0;
+    border-radius: 999px;
+    border: 1.5px solid var(--ink);
+  }
+  .badge--next {
+    background: var(--marker);
+  }
+  .badge--later {
+    background: var(--paper);
+  }
+  .badge--explore {
+    background: var(--paper);
+    border-style: dashed;
+    color: var(--muted);
+  }
+  .text {
+    font-size: 1.02rem;
+  }
+
+  @media (max-width: 560px) {
+    .list li {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+</style>

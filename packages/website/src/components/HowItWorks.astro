@@ -1,0 +1,203 @@
+---
+const adapters = ["Prisma", "Drizzle", "Mongoose", "raw SQL"];
+
+// set:html — these snippets contain braces that Astro would otherwise treat as expressions.
+const yamlHtml = `<span class="yk">version:</span> 1
+<span class="yk">tables:</span>
+  <span class="yk">user:</span>
+    <span class="yk">rows:</span> 10000
+    <span class="yk">filters:</span>
+      - <span class="yk">when:</span> { status: active }
+        <span class="yk">rows:</span> 10`;
+
+const beforeHtml = `for (const u of users)
+  await prisma.post.findMany(
+    { where: { authorId: u.id } })`;
+
+const afterHtml = `await prisma.post.findMany({
+  where: { authorId: { in: ids } },
+})`;
+---
+
+<section class="how" id="how">
+  <div class="container">
+    <p class="eyebrow">How it works</p>
+    <h2 class="title">Reads your queries the way the&nbsp;database will.</h2>
+
+    <div class="adapters">
+      <span class="alabel">Adapters</span>
+      <ul class="chips">
+        {adapters.map((a) => <li>{a}</li>)}
+        <li class="chip--muted">+ heuristic fallback</li>
+      </ul>
+    </div>
+
+    <div class="split">
+      <div class="panel">
+        <h3>Teach it about your data</h3>
+        <p>
+          Drop a <code>queryguard.knowledge.yaml</code> beside your code. QueryGuard
+          silences loops over provably-small sets, escalates provably-large fan-out,
+          and flags over-fetching — all from facts you write, never transmitted.
+        </p>
+        <pre class="yaml"><code set:html={yamlHtml} /></pre>
+      </div>
+
+      <div class="panel">
+        <h3>See the fix</h3>
+        <p>Every finding points at the batched query that replaces the loop.</p>
+        <div class="ba">
+          <span class="ba-tag ba-tag--before">Before</span>
+          <pre class="mini before"><code set:html={beforeHtml} /></pre>
+          <span class="ba-arrow" aria-hidden="true">↓</span>
+          <span class="ba-tag ba-tag--after">After</span>
+          <pre class="mini after"><code set:html={afterHtml} /></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .how {
+    padding-block: clamp(3.5rem, 8vw, 6.5rem);
+    border-top: 1.5px solid var(--ink);
+  }
+  .title {
+    margin-top: 1.2rem;
+    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
+    max-width: 18ch;
+  }
+  .adapters {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.9rem 1.1rem;
+    margin-top: 2.4rem;
+  }
+  .alabel {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .chips li {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    padding: 0.35rem 0.75rem;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: var(--paper);
+  }
+  .chip--muted {
+    border-style: dashed !important;
+    color: var(--muted);
+  }
+  .split {
+    margin-top: 2.8rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .panel {
+    border: 1.5px solid var(--ink);
+    border-radius: 12px;
+    padding: 1.6rem 1.5rem;
+    background: var(--paper);
+  }
+  .panel h3 {
+    font-size: 1.25rem;
+  }
+  .panel > p {
+    margin-top: 0.6rem;
+    color: #2b2b28;
+    font-size: 0.96rem;
+  }
+  .panel code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--marker);
+    padding: 0.05em 0.3em;
+    border-radius: 3px;
+  }
+  .yaml {
+    margin: 1.2rem 0 0;
+    padding: 1.1rem 1.2rem;
+    background: #0d0d0d;
+    color: #f4f4f0;
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.75;
+    overflow-x: auto;
+  }
+  .yaml code {
+    background: none;
+    padding: 0;
+  }
+  .yk {
+    color: var(--marker);
+  }
+  .ba {
+    margin-top: 1.2rem;
+    display: grid;
+    justify-items: start;
+    gap: 0.55rem;
+  }
+  .ba-tag {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.15em 0.5em;
+    border-radius: 4px;
+  }
+  .ba-tag--before {
+    background: #f0dede;
+    color: var(--red);
+  }
+  .ba-tag--after {
+    background: var(--marker);
+    color: var(--ink);
+  }
+  .ba-arrow {
+    color: var(--muted);
+    font-size: 1.1rem;
+    padding-left: 0.3rem;
+  }
+  .mini {
+    margin: 0;
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .before {
+    background: #f4ecec;
+    color: #6b3b3b;
+    text-decoration: none;
+  }
+  .after {
+    background: #0d0d0d;
+    color: #f4f4f0;
+  }
+
+  @media (max-width: 780px) {
+    .split {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

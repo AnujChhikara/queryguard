@@ -1,0 +1,76 @@
+---
+const repo = "https://github.com/AnujChhikara/queryguard";
+---
+
+<footer class="footer">
+  <div class="container inner">
+    <div class="cta">
+      <h2>Stop shipping the 10,000-query loop.</h2>
+      <a class="btn btn--primary" href={repo}>
+        View on GitHub
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+    <div class="fine">
+      <span class="mono">QueryGuard</span>
+      <span class="links">
+        <a href={repo}>GitHub</a>
+        <a href={`${repo}/blob/main/LICENSE`}>MIT</a>
+      </span>
+      <span class="mono muted">Static database linter · 2026</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1.5px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+    padding-block: clamp(3rem, 7vw, 5rem);
+  }
+  .cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid #2a2a28;
+  }
+  .cta h2 {
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    max-width: 16ch;
+  }
+  /* Invert the primary button on the dark footer. */
+  .footer .btn--primary {
+    background: var(--marker);
+    color: var(--ink);
+    border-color: var(--marker);
+  }
+  .footer .btn--primary:hover {
+    background: var(--paper);
+    border-color: var(--paper);
+  }
+  .fine {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+  .links {
+    display: flex;
+    gap: 1.3rem;
+  }
+  .links a {
+    text-decoration: none;
+    border-bottom: 1.5px solid var(--marker);
+  }
+  .muted {
+    color: #8a8a85;
+  }
+</style>

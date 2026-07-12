@@ -1,0 +1,62 @@
+---
+const repo = "https://github.com/AnujChhikara/queryguard";
+---
+
+<header class="header">
+  <div class="container bar">
+    <a class="wordmark" href="/">
+      QueryGuard<span class="tick">▮</span>
+    </a>
+    <nav class="meta">
+      <span class="ver">v0.0.0</span>
+      <span class="dot">·</span>
+      <a href={repo}>GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    border-bottom: 1.5px solid var(--ink);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 1.05rem;
+  }
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.12rem;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+  .tick {
+    color: var(--marker);
+    -webkit-text-stroke: 0.4px var(--ink);
+    margin-left: 0.12em;
+  }
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+  .meta a {
+    text-decoration: none;
+    border-bottom: 1.5px solid var(--marker);
+    padding-bottom: 1px;
+  }
+  .meta a:hover {
+    background: var(--marker);
+  }
+  .dot {
+    color: var(--muted);
+  }
+  .ver {
+    color: var(--muted);
+  }
+</style>

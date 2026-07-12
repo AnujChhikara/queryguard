@@ -1,0 +1,187 @@
+---
+const repo = "https://github.com/AnujChhikara/queryguard";
+
+// Rendered with set:html so the braces in the code aren't parsed as Astro expressions.
+const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users = <span class="kw">await</span> prisma.user.findMany()
+<span class="ln"> </span><span class="kw">for</span> (<span class="kw">const</span> user <span class="kw">of</span> users) {
+<span class="ln"> </span>  <span class="kw">await</span> <span class="hl squig">prisma.post.findMany({ where: { authorId: user.id } })</span>
+<span class="ln"> </span>}`;
+---
+
+<section class="hero">
+  <div class="container grid">
+    <div class="copy">
+      <p class="eyebrow">Static database linter · TypeScript &amp; JavaScript</p>
+      <h1 class="headline">
+        Spot the query your ORM<br /> quietly runs
+        <span class="mark">10,000 times</span>.
+      </h1>
+      <p class="sub">
+        QueryGuard is a static linter that catches N+1 loops, unbounded reads, and
+        over-fetching — before they reach production. No LLM, no database
+        connection; your code never leaves your machine.
+      </p>
+      <div class="actions">
+        <a class="btn btn--primary" href={repo}>
+          View on GitHub
+          <span aria-hidden="true">→</span>
+        </a>
+        <span class="soon">Coming to the VS&nbsp;Code Marketplace</span>
+      </div>
+    </div>
+
+    <div class="card-wrap">
+      <div class="glow" aria-hidden="true"></div>
+      <figure class="card" aria-label="A QueryGuard N+1 diagnostic on a Prisma query">
+        <figcaption class="chrome">
+          <span class="d"></span><span class="d"></span><span class="d"></span>
+          <span class="file">users.service.ts</span>
+        </figcaption>
+        <pre class="code"><code set:html={codeHtml} /></pre>
+        <div class="diag">
+          <span class="sev">error</span>
+          <span class="rule">n-plus-one</span>
+          <span class="msg">Query on “post” runs once per user — batch it into one query.</span>
+        </div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: clamp(3.5rem, 9vw, 7rem);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: center;
+  }
+  .headline {
+    font-size: clamp(2.5rem, 6.3vw, 5rem);
+    margin-top: 1.4rem;
+  }
+  .sub {
+    max-width: 34ch;
+    margin-top: 1.6rem;
+    color: #2b2b28;
+    font-size: 1.06rem;
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem 1.35rem;
+    margin-top: 2.2rem;
+  }
+  .soon {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---- diagnostic card ---- */
+  .card-wrap {
+    position: relative;
+  }
+  .glow {
+    position: absolute;
+    inset: 8% 6%;
+    background: var(--marker);
+    filter: blur(80px);
+    opacity: 0.55;
+    z-index: 0;
+  }
+  .card {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    background: #0d0d0d;
+    color: #f4f4f0;
+    border: 1.5px solid var(--ink);
+    border-radius: 14px;
+    box-shadow: 10px 12px 0 var(--ink);
+    overflow: hidden;
+  }
+  .chrome {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.7rem 0.95rem;
+    border-bottom: 1px solid #262625;
+  }
+  .chrome .d {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3a3a38;
+  }
+  .file {
+    margin-left: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: #8a8a85;
+  }
+  .code {
+    margin: 0;
+    padding: 1.2rem 1.25rem 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.85;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .code .kw {
+    color: #b9b9b3;
+  }
+  .code .ln {
+    color: #55554f;
+    user-select: none;
+  }
+  .hl {
+    background: var(--marker);
+    color: var(--ink);
+    border-radius: 3px;
+    padding: 0.1em 0.15em;
+  }
+  .squig {
+    text-decoration: underline wavy var(--red);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+  .diag {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.7rem;
+    padding: 0.95rem 1.25rem 1.15rem;
+    border-top: 1px solid #262625;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+  }
+  .sev {
+    color: var(--red);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .rule {
+    color: var(--marker);
+  }
+  .msg {
+    color: #b7b7b1;
+    flex: 1 1 14ch;
+  }
+
+  @media (max-width: 860px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .card-wrap {
+      order: 2;
+    }
+  }
+</style>
