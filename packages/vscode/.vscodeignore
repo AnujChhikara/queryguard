@@ -7,3 +7,4 @@ tsup.config.ts
 vitest.config.ts
 **/*.map
 node_modules/**
+scripts/**
