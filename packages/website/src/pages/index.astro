@@ -8,9 +8,27 @@ import HowItWorks from "../components/HowItWorks.astro";
 import Roadmap from "../components/Roadmap.astro";
 import Footer from "../components/Footer.astro";
 
-const title = "Cardinal — a static database linter for TypeScript";
+const title = "Cardinal - a database linter for TypeScript & JavaScript";
 const description =
-  "Cardinal catches N+1 loops, unbounded reads, and over-fetching in TypeScript/JavaScript — statically, with no LLM, network, or database connection.";
+  "A static linter for TypeScript & JavaScript that catches N+1 loops, unbounded reads, and over-fetching in Prisma, Drizzle, Mongoose, and raw SQL - right in your editor, 100% offline.";
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL("/og.png", Astro.site).href;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Cardinal",
+  applicationCategory: "DeveloperApplication",
+  operatingSystem: "Windows, macOS, Linux",
+  description,
+  url: new URL("/", Astro.site).href,
+  softwareVersion: "0.1.1",
+  downloadUrl: "https://marketplace.visualstudio.com/items?itemName=anujchhikara.cardinal-vscode",
+  license: "https://opensource.org/licenses/MIT",
+  author: { "@type": "Person", name: "Anuj Chhikara" },
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+};
 ---
 
 <!doctype html>
@@ -21,10 +39,36 @@ const description =
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Anuj Chhikara" />
+    <meta name="keywords" content="database linter, N+1 query, Prisma, Drizzle, Mongoose, SQL, TypeScript, JavaScript, static analysis, VS Code extension, query optimization, ORM" />
+    <meta name="theme-color" content="#f8f8f6" />
+
+    <!-- Open Graph -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#f8f8f6" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Cardinal" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <!-- Opt into motion before paint (avoids a flash); reduced-motion users skip it. -->
+    <script is:inline>
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.documentElement.classList.add("motion");
+      }
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -43,5 +87,35 @@ const description =
       <Roadmap />
     </main>
     <Footer />
+
+    <script>
+      import { animate, inView, stagger } from "motion";
+
+      // Only animate when the pre-paint flag opted in (JS on, motion allowed).
+      if (document.documentElement.classList.contains("motion")) {
+        const ease = [0.22, 0.61, 0.36, 1];
+
+        // Hero: gentle staggered entrance on load.
+        animate(
+          "[data-hero-item]",
+          { opacity: [0, 1], transform: ["translateY(14px)", "translateY(0)"] },
+          { duration: 0.55, delay: stagger(0.09, { startDelay: 0.05 }), easing: ease },
+        );
+
+        // Everything else: reveal as it scrolls into view.
+        inView(
+          "[data-reveal]",
+          (info) => {
+            const el = info && info.target ? info.target : info;
+            animate(
+              el,
+              { opacity: [0, 1], transform: ["translateY(18px)", "translateY(0)"] },
+              { duration: 0.5, easing: ease },
+            );
+          },
+          { margin: "0px 0px -12% 0px" },
+        );
+      }
+    </script>
   </body>
 </html>

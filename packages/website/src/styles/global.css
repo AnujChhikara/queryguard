@@ -129,6 +129,13 @@ a {
   outline-offset: 3px;
 }
 
+/* Motion: hide animated elements only once JS opts in (html.motion). No-JS and
+   reduced-motion users never get this class, so they see everything immediately. */
+.motion [data-hero-item],
+.motion [data-reveal] {
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

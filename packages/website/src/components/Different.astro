@@ -32,20 +32,20 @@ const columns = [
 
 <section class="different" id="why">
   <div class="container">
-    <p class="eyebrow">Why Cardinal</p>
-    <h2 class="title">
+    <p class="eyebrow" data-reveal>Why Cardinal</p>
+    <h2 class="title" data-reveal>
       You could ask an AI to check every query.<br />
-      <span class="mark">You won't</span> — not every time.
+      <span class="mark">You won't</span> - not every time.
     </h2>
-    <p class="lead">
+    <p class="lead" data-reveal>
       An AI review is something you have to remember to do. Cardinal is the catch
-      that's always on — and the only one that knows how big your data actually is.
+      that's always on - and the only one that knows how big your data actually is.
     </p>
 
     <div class="cols">
       {
         columns.map((c) => (
-          <div class:list={["col", { "col--win": c.highlight }]}>
+          <div class:list={["col", { "col--win": c.highlight }]} data-reveal>
             <div class="col-head">
               <span class="col-name">{c.name}</span>
               {c.highlight && <span class="badge">You</span>}
@@ -68,7 +68,6 @@ const columns = [
 <style>
   .different {
     padding-block: clamp(3.5rem, 8vw, 6.5rem);
-    border-top: 1.5px solid var(--ink);
   }
   .title {
     margin-top: 1.2rem;

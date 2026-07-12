@@ -3,28 +3,34 @@ const rules = [
   {
     id: "n-plus-one",
     title: "N+1 loops",
-    body: "A query inside a loop runs once per row — 1 + N round trips. Cardinal flags it and, with a knowledge file, silences the ones that are provably small.",
+    body: "A query inside a loop runs once per row, so 100 rows is 101 round trips. Cardinal points you at the single batched query - and with a knowledge file it stays quiet on the loops that are provably small.",
   },
   {
     id: "unbounded-read",
     title: "Unbounded reads",
-    body: "A read with no WHERE and no LIMIT can scan an entire table. Caught before it quietly turns into a full-table load in production.",
+    body: "A read with no WHERE and no LIMIT scans the whole table. Flagged before it grows from fast in dev to a full-table load under real traffic.",
   },
   {
     id: "over-fetch",
     title: "Over-fetching",
-    body: "Loading a whole large table when a selective subset would do. Cardinal suggests the narrower read from facts you declare about your data.",
+    body: "Pulling an entire large table when a small subset would do. Cardinal suggests the narrower read from facts you declare about your data.",
+  },
+  {
+    id: "raw SQL",
+    title: "Slow SQL patterns",
+    body: "ORDER BY RAND(), leading-wildcard LIKE, and over-joined queries - the raw-SQL smells that skip the index, parsed and flagged like everything else.",
   },
 ];
 ---
 
 <section class="features" id="what">
   <div class="container">
-    <p class="eyebrow">What it catches</p>
+    <p class="eyebrow" data-reveal>What it catches</p>
+    <h2 class="title" data-reveal>The mistakes your ORM makes easy to write.</h2>
     <div class="rows">
       {
         rules.map((r, i) => (
-          <article class="row">
+          <article class="row" data-reveal>
             <span class="idx">{String(i + 1).padStart(2, "0")}</span>
             <div class="rule-body">
               <h3>{r.title}</h3>
@@ -37,11 +43,11 @@ const rules = [
     </div>
 
     <div class="promises">
-      <div class="promise">
+      <div class="promise" data-reveal>
         <h4>Database-aware</h4>
-        <p>Not a generic linter — it understands query shape, cardinality, and the cost of a round trip.</p>
+        <p>Not a generic linter - it reads query shape, cardinality, and the real cost of a round trip.</p>
       </div>
-      <div class="promise">
+      <div class="promise" data-reveal>
         <h4>100% static</h4>
         <p>No LLM, no network, no database connection. Analysis runs entirely on your machine.</p>
       </div>
@@ -52,10 +58,14 @@ const rules = [
 <style>
   .features {
     padding-block: clamp(3.5rem, 8vw, 6.5rem);
-    border-top: 1.5px solid var(--ink);
+  }
+  .title {
+    margin-top: 1.2rem;
+    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
+    max-width: 18ch;
   }
   .rows {
-    margin-top: 2.5rem;
+    margin-top: 2.8rem;
     display: grid;
     gap: 0;
   }

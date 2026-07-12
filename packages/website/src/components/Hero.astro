@@ -13,28 +13,44 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
 <section class="hero">
   <div class="container grid">
     <div class="copy">
-      <p class="eyebrow">Static database linter · TypeScript &amp; JavaScript</p>
-      <h1 class="headline">
+      <p class="eyebrow" data-hero-item>Static database linter · TypeScript &amp; JavaScript</p>
+      <h1 class="headline" data-hero-item>
         Spot the query your ORM<br /> quietly runs
         <span class="mark">10,000 times</span>.
       </h1>
-      <p class="sub">
-        Cardinal is a static linter that catches N+1 loops, unbounded reads, and
-        over-fetching — before they reach production. No LLM, no database
-        connection; your code never leaves your machine.
+      <p class="sub" data-hero-item>
+        The slow queries you'd catch in code review - N+1 loops, unbounded reads,
+        over-fetching - caught automatically as you type. 100% static: no LLM, no
+        database connection.
       </p>
-      <div class="actions">
+      <div class="actions" data-hero-item>
         <a class="btn btn--primary" href={marketplace}>
           Install for VS&nbsp;Code
           <span aria-hidden="true">→</span>
         </a>
         <a class="btn" href={repo}>View on GitHub</a>
       </div>
-      <a class="soon soon--link" href={openvsx}>Also on Open&nbsp;VSX — Cursor &amp; VSCodium →</a>
-      <p class="install"><span class="dollar">$</span> npm i -D cardinal-cli</p>
+      <a class="soon soon--link" href={openvsx} data-hero-item>Also on Open&nbsp;VSX - Cursor &amp; VSCodium →</a>
+      <button
+        class="install"
+        data-hero-item
+        type="button"
+        data-copy="npm i -D cardinal-cli"
+        aria-label="Copy install command"
+      >
+        <span class="cmd"><span class="dollar">$</span> npm i -D cardinal-cli</span>
+        <span class="copy-icon" aria-hidden="true">
+          <svg class="ic copy" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          <svg class="ic check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </span>
+      </button>
     </div>
 
-    <div class="card-wrap">
+    <div class="card-wrap" data-hero-item>
       <div class="glow" aria-hidden="true"></div>
       <figure class="card" aria-label="A Cardinal N+1 diagnostic on a Prisma query">
         <figcaption class="chrome">
@@ -45,12 +61,29 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
         <div class="diag">
           <span class="sev">error</span>
           <span class="rule">n-plus-one</span>
-          <span class="msg">Query on “post” runs once per user — batch it into one query.</span>
+          <span class="msg">Query on “post” runs once per user - batch it into one query.</span>
         </div>
       </figure>
     </div>
   </div>
 </section>
+
+<script>
+  document.querySelectorAll("[data-copy]").forEach((btn) => {
+    let timer: ReturnType<typeof setTimeout>;
+    btn.addEventListener("click", async () => {
+      const text = btn.getAttribute("data-copy") || "";
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        return;
+      }
+      btn.classList.add("copied");
+      clearTimeout(timer);
+      timer = setTimeout(() => btn.classList.remove("copied"), 1600);
+    });
+  });
+</script>
 
 <style>
   .hero {
@@ -97,19 +130,43 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
     color: var(--ink);
   }
   .install {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
     margin-top: 1.4rem;
-    padding: 0.6rem 0.95rem;
+    padding: 0.55rem 0.7rem 0.55rem 0.95rem;
     font-family: var(--font-mono);
     font-size: 0.86rem;
     background: var(--ink);
     color: var(--paper);
+    border: 0;
     border-radius: 8px;
+    cursor: pointer;
   }
   .install .dollar {
     color: var(--marker);
     margin-right: 0.5rem;
     user-select: none;
+  }
+  .copy-icon {
+    display: inline-flex;
+    color: #8a8a85;
+    transition: color 0.15s ease;
+  }
+  .install:hover .copy-icon {
+    color: var(--paper);
+  }
+  .ic.check {
+    display: none;
+  }
+  .install.copied .copy-icon {
+    color: var(--marker);
+  }
+  .install.copied .ic.copy {
+    display: none;
+  }
+  .install.copied .ic.check {
+    display: inline;
   }
 
   /* ---- diagnostic card ---- */

@@ -1,7 +1,7 @@
 ---
 const adapters = ["Prisma", "Drizzle", "Mongoose", "raw SQL"];
 
-// set:html — these snippets contain braces that Astro would otherwise treat as expressions.
+// set:html - these snippets contain braces that Astro would otherwise treat as expressions.
 const yamlHtml = `<span class="yk">version:</span> 1
 <span class="yk">tables:</span>
   <span class="yk">user:</span>
@@ -21,10 +21,10 @@ const afterHtml = `await prisma.post.findMany({
 
 <section class="how" id="how">
   <div class="container">
-    <p class="eyebrow">How it works</p>
-    <h2 class="title">Reads your queries the way the&nbsp;database will.</h2>
+    <p class="eyebrow" data-reveal>How it works</p>
+    <h2 class="title" data-reveal>Reads your queries the way the&nbsp;database will.</h2>
 
-    <div class="adapters">
+    <div class="adapters" data-reveal>
       <span class="alabel">Adapters</span>
       <ul class="chips">
         {adapters.map((a) => <li>{a}</li>)}
@@ -33,17 +33,17 @@ const afterHtml = `await prisma.post.findMany({
     </div>
 
     <div class="split">
-      <div class="panel">
+      <div class="panel" data-reveal>
         <h3>Teach it about your data</h3>
         <p>
           Drop a <code>cardinal.knowledge.yaml</code> beside your code. Cardinal
           silences loops over provably-small sets, escalates provably-large fan-out,
-          and flags over-fetching — all from facts you write, never transmitted.
+          and flags over-fetching - all from facts you write, never transmitted.
         </p>
         <pre class="yaml"><code set:html={yamlHtml} /></pre>
       </div>
 
-      <div class="panel">
+      <div class="panel" data-reveal>
         <h3>See the fix</h3>
         <p>Every finding points at the batched query that replaces the loop.</p>
         <div class="ba">
@@ -61,7 +61,6 @@ const afterHtml = `await prisma.post.findMany({
 <style>
   .how {
     padding-block: clamp(3.5rem, 8vw, 6.5rem);
-    border-top: 1.5px solid var(--ink);
   }
   .title {
     margin-top: 1.2rem;
@@ -140,7 +139,8 @@ const afterHtml = `await prisma.post.findMany({
     line-height: 1.75;
     overflow-x: auto;
   }
-  .yaml code {
+  .yaml code,
+  .mini code {
     background: none;
     padding: 0;
   }
@@ -186,13 +186,15 @@ const afterHtml = `await prisma.post.findMany({
     overflow-x: auto;
   }
   .before {
-    background: #f4ecec;
-    color: #6b3b3b;
+    background: #f3f2ef;
+    color: #45443f;
+    border: 1px solid var(--grid);
     text-decoration: none;
   }
   .after {
     background: #0d0d0d;
     color: #f4f4f0;
+    border-left: 3px solid var(--marker);
   }
 
   @media (max-width: 780px) {

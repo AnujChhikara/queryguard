@@ -1,21 +1,21 @@
 ---
 const items = [
-  { s: "next", t: "Config file — enable/disable rules, override severities" },
-  { s: "next", t: "Deeper adapters — predicate values, Drizzle query builder, real SQL parsing" },
-  { s: "later", t: "More engines — MySQL, Postgres, PlanetScale limits" },
-  { s: "later", t: "VS Code Marketplace release" },
-  { s: "explore", t: "Deep mode — cross-module data-flow & schema-aware checks" },
+  { s: "shipped", t: "Config file, a real SQL parser, and the VS Code Marketplace + Open VSX" },
+  { s: "next", t: "Predicate-value extraction, so over-fetch and cardinality work beyond Prisma" },
+  { s: "next", t: "More parser-backed SQL rules: subqueries, HAVING / GROUP BY misuse, SELECT *" },
+  { s: "later", t: "More engines (MySQL, Postgres, PlanetScale) and layers (TypeORM, Kysely)" },
+  { s: "explore", t: "Deep mode: cross-module data-flow and schema-aware checks" },
 ];
 ---
 
 <section class="roadmap" id="next">
   <div class="container">
-    <p class="eyebrow">What's next</p>
-    <h2 class="title">Early, and moving.</h2>
+    <p class="eyebrow" data-reveal>What's next</p>
+    <h2 class="title" data-reveal>Early, and moving.</h2>
     <ul class="list">
       {
         items.map((i) => (
-          <li>
+          <li data-reveal>
             <span class={`badge badge--${i.s}`}>{i.s}</span>
             <span class="text">{i.t}</span>
           </li>
@@ -28,7 +28,6 @@ const items = [
 <style>
   .roadmap {
     padding-block: clamp(3.5rem, 8vw, 6.5rem);
-    border-top: 1.5px solid var(--ink);
   }
   .title {
     margin-top: 1.2rem;
@@ -60,6 +59,10 @@ const items = [
     padding: 0.25em 0;
     border-radius: 999px;
     border: 1.5px solid var(--ink);
+  }
+  .badge--shipped {
+    background: var(--ink);
+    color: var(--paper);
   }
   .badge--next {
     background: var(--marker);
