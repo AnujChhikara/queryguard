@@ -26,6 +26,8 @@ This is a pnpm monorepo:
 |---------|--------------|
 | `cardinal-core` | Parses TS with ts-morph, normalizes query calls into `QueryDescriptor`s, runs rules, emits diagnostics. Front-end-agnostic. |
 | `cardinal-cli` | Globs files, runs the engine, prints diagnostics, sets the exit code (for CI gates). |
+| `cardinal-vscode` | The VS Code / Cursor / VSCodium extension — live diagnostics + a suppress quick-fix, sharing the same engine. |
+| `cardinal-website` | The Astro marketing site (this repo's landing page). |
 
 ## Requirements
 
@@ -207,13 +209,15 @@ Rule-authoring reference: [`docs/database-knowledge/`](docs/database-knowledge/)
 
 ## Roadmap
 
-- More parser-backed SQL rules: subqueries, `HAVING`/`GROUP BY` misuse, `SELECT *`.
-- Deepen the newer adapters: predicate-value extraction (unlocks `over-fetch` /
-  cardinality beyond Prisma) and Drizzle's chained query builder.
-- More engines (MySQL/PlanetScale/Postgres limits) and data layers (TypeORM, Kysely).
-- Ship: publish to the VS Code Marketplace + npm, deploy the site.
+Shipped: config file, a real SQL parser, and releases to the **VS Code
+Marketplace**, **Open VSX**, and **npm** (automated on a version tag — see
+[`PUBLISHING.md`](PUBLISHING.md)). Next:
 
-See [`LAUNCH.md`](LAUNCH.md) for the v0 release checklist.
+- Predicate-value extraction for Drizzle / Mongoose / raw SQL, so `over-fetch`
+  and cardinality work beyond Prisma.
+- More parser-backed SQL rules: subqueries, `HAVING`/`GROUP BY` misuse, `SELECT *`.
+- More engines (MySQL/PlanetScale/Postgres limits) and data layers (TypeORM, Kysely).
+- Deep mode: cross-module data-flow and schema-aware checks.
 
 ## License
 
