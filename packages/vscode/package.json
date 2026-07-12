@@ -1,11 +1,15 @@
 {
   "name": "cardinal-vscode",
   "displayName": "Cardinal",
-  "description": "Flags inefficient database access (N+1 queries) in TypeScript/JavaScript as you type.",
-  "version": "0.0.0",
+  "description": "A database-aware linter for TypeScript/JavaScript. Flags N+1 loops, unbounded reads, and over-fetching as you type — 100% static.",
+  "version": "0.1.0",
   "publisher": "anujchhikara",
   "license": "MIT",
+  "categories": ["Linters", "Programming Languages"],
+  "keywords": ["n+1", "prisma", "drizzle", "mongoose", "sql", "database", "linter"],
+  "homepage": "https://github.com/AnujChhikara/cardinal#readme",
   "repository": { "type": "git", "url": "https://github.com/AnujChhikara/cardinal" },
+  "bugs": { "url": "https://github.com/AnujChhikara/cardinal/issues" },
   "engines": { "vscode": "^1.85.0" },
   "main": "./dist/extension.js",
   "activationEvents": [
