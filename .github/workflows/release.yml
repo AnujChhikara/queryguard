@@ -1,10 +1,10 @@
 name: Release
 
-# Publishes on a version tag: bump versions, `git tag vX.Y.Z`, `git push --follow-tags`.
+# Publishes ONLY on a version tag. Pushing to main never publishes (that's ci.yml,
+# which just builds + tests). Release = manually create + push a v* tag.
 on:
   push:
     tags: ["v*"]
-  workflow_dispatch: {}
 
 permissions:
   contents: write # create the GitHub Release
