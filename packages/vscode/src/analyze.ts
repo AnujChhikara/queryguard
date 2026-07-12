@@ -1,4 +1,4 @@
-import { analyzeSource, type Diagnostic, type Knowledge } from "@cardinal/core";
+import { analyzeSource, type Diagnostic, type Knowledge, type CardinalConfig } from "@cardinal/core";
 
 export interface MappedDiagnostic {
   startOffset: number;
@@ -21,10 +21,11 @@ export function toVsDiagnostics(
   code: string,
   fileName: string,
   knowledge?: Knowledge | null,
+  config?: CardinalConfig | null,
 ): MappedDiagnostic[] {
   let diagnostics: Diagnostic[];
   try {
-    diagnostics = analyzeSource(code, fileName, knowledge ?? null);
+    diagnostics = analyzeSource(code, fileName, knowledge ?? null, config ?? null);
   } catch {
     return [];
   }

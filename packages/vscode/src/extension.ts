@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { dirname } from "node:path";
 import { toVsDiagnostics, type MappedDiagnostic } from "./analyze.js";
 import { KnowledgeCache } from "./knowledge-cache.js";
+import { ConfigCache } from "./config-cache.js";
 import { performSuppression, type SuppressIO } from "./suppress-action.js";
 
 const TARGET_LANGUAGES = new Set([
@@ -64,13 +65,16 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const timers = new Map<string, ReturnType<typeof setTimeout>>();
   const knowledgeCache = new KnowledgeCache();
+  const configCache = new ConfigCache();
 
   function analyzeDocument(doc: vscode.TextDocument): void {
     if (!TARGET_LANGUAGES.has(doc.languageId)) return;
-    // Discover a cardinal.knowledge.yaml above the file being analyzed. The
-    // cache keeps the upward filesystem walk off the debounced hot path.
-    const knowledge = knowledgeEnabled() ? knowledgeCache.get(dirname(doc.fileName)) : null;
-    const mapped = toVsDiagnostics(doc.getText(), doc.fileName, knowledge);
+    // Discover cardinal.knowledge.yaml / cardinal.config.* above the file. The
+    // caches keep the upward filesystem walks off the debounced hot path.
+    const dir = dirname(doc.fileName);
+    const knowledge = knowledgeEnabled() ? knowledgeCache.get(dir) : null;
+    const config = configCache.get(dir);
+    const mapped = toVsDiagnostics(doc.getText(), doc.fileName, knowledge, config);
     const diags = mapped.map((m) => {
       const range = new vscode.Range(
         doc.positionAt(m.startOffset),
@@ -97,20 +101,26 @@ export function activate(context: vscode.ExtensionContext): void {
     );
   }
 
-  // Invalidate the knowledge cache and re-lint every open document. Called when
-  // a knowledge file changes on disk or the useKnowledge setting is toggled.
+  // Invalidate the discovery caches and re-lint every open document. Called when
+  // a knowledge/config file changes on disk or the useKnowledge setting toggles.
   function refreshKnowledge(): void {
     knowledgeCache.clear();
+    configCache.clear();
     for (const doc of vscode.workspace.textDocuments) analyzeDocument(doc);
   }
 
-  const watcher = vscode.workspace.createFileSystemWatcher(
+  const knowledgeWatcher = vscode.workspace.createFileSystemWatcher(
     "**/cardinal.knowledge.{yaml,yml,json}",
   );
-  watcher.onDidChange(refreshKnowledge);
-  watcher.onDidCreate(refreshKnowledge);
-  watcher.onDidDelete(refreshKnowledge);
-  context.subscriptions.push(watcher);
+  const configWatcher = vscode.workspace.createFileSystemWatcher(
+    "**/cardinal.config.{json,yaml,yml}",
+  );
+  for (const w of [knowledgeWatcher, configWatcher]) {
+    w.onDidChange(refreshKnowledge);
+    w.onDidCreate(refreshKnowledge);
+    w.onDidDelete(refreshKnowledge);
+    context.subscriptions.push(w);
+  }
 
   // Suppression quick-fix: lightbulb on a Cardinal diagnostic → write a
   // suppression (and optional cardinality fact) to the knowledge file.

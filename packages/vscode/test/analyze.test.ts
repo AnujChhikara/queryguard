@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseKnowledge } from "@cardinal/core";
+import { parseKnowledge, parseConfig } from "@cardinal/core";
 import { toVsDiagnostics } from "../src/analyze.js";
 
 const KNOWLEDGE = parseKnowledge(
@@ -55,5 +55,10 @@ describe("toVsDiagnostics", () => {
 
   it("silences n-plus-one when knowledge proves the driving set small", () => {
     expect(toVsDiagnostics(SMALL_LOOP, "a.ts", KNOWLEDGE).some((d) => d.ruleId === "n-plus-one")).toBe(false);
+  });
+
+  it("drops a diagnostic for a rule turned off in config", () => {
+    const config = parseConfig(`{ "rules": { "n-plus-one": "off" } }`, "/p");
+    expect(toVsDiagnostics(N_PLUS_ONE, "a.ts", null, config).some((d) => d.ruleId === "n-plus-one")).toBe(false);
   });
 });

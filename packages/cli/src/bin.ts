@@ -1,19 +1,26 @@
 #!/usr/bin/env node
-import { discoverKnowledge, loadKnowledge } from "@cardinal/core";
-import type { Knowledge } from "@cardinal/core";
+import { discoverKnowledge, loadKnowledge, discoverConfig } from "@cardinal/core";
+import type { Knowledge, CardinalConfig } from "@cardinal/core";
 import { run } from "./run.js";
 
-function parseArgs(argv: string[]): { patterns: string[]; knowledgePath?: string; noKnowledge: boolean } {
+function parseArgs(argv: string[]): {
+  patterns: string[];
+  knowledgePath?: string;
+  noKnowledge: boolean;
+  noConfig: boolean;
+} {
   const patterns: string[] = [];
   let knowledgePath: string | undefined;
   let noKnowledge = false;
+  let noConfig = false;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--no-knowledge") noKnowledge = true;
+    else if (a === "--no-config") noConfig = true;
     else if (a === "--knowledge") knowledgePath = argv[++i];
     else patterns.push(a);
   }
-  return { patterns, knowledgePath, noKnowledge };
+  return { patterns, knowledgePath, noKnowledge, noConfig };
 }
 
 async function main() {
@@ -38,9 +45,9 @@ async function main() {
     process.exit(res.code);
   }
 
-  const { patterns, knowledgePath, noKnowledge } = parseArgs(argv);
+  const { patterns, knowledgePath, noKnowledge, noConfig } = parseArgs(argv);
   if (patterns.length === 0) {
-    console.error("usage: cardinal [--knowledge <path>] [--no-knowledge] <glob> [glob...]");
+    console.error("usage: cardinal [--knowledge <path>] [--no-knowledge] [--no-config] <glob> [glob...]");
     process.exit(2);
   }
 
@@ -50,7 +57,13 @@ async function main() {
     if (knowledge) console.error(`cardinal: using knowledge from ${knowledgePath ?? "cardinal.knowledge.yaml"}`);
   }
 
-  const { diagnostics, errorCount } = await run(patterns, process.cwd(), { knowledge });
+  let config: CardinalConfig | null = null;
+  if (!noConfig) {
+    config = discoverConfig(process.cwd());
+    if (config) console.error("cardinal: using config from cardinal.config");
+  }
+
+  const { diagnostics, errorCount } = await run(patterns, process.cwd(), { knowledge, config });
 
   for (const d of diagnostics) {
     console.log(`${d.file}:${d.range.line}:${d.range.column}  ${d.severity}  ${d.ruleId}  ${d.message}`);

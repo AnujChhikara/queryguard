@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { discoverKnowledge } from "@cardinal/core";
+import { discoverKnowledge, discoverConfig } from "@cardinal/core";
 import { run } from "../src/run.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -35,6 +35,19 @@ describe("run", () => {
       const { diagnostics } = await run(["a.ts"], dir, { knowledge });
       // over-fetch fires (unfiltered read on large table w/ selective filter)
       expect(diagnostics.some((d) => d.ruleId === "over-fetch")).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("honors a config file that turns a rule off", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "qg-cfg-"));
+    try {
+      writeFileSync(join(dir, "cardinal.config.json"), `{ "rules": { "unbounded-read": "off" } }`);
+      writeFileSync(join(dir, "a.ts"), `async function r(prisma){ return prisma.user.findMany(); }`);
+      const config = discoverConfig(dir);
+      const { diagnostics } = await run(["a.ts"], dir, { config });
+      expect(diagnostics.some((d) => d.ruleId === "unbounded-read")).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
