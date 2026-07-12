@@ -69,4 +69,33 @@ describe("mongooseAdapter", () => {
     const call = firstCall(`async function r(list){ return list.find({ id: 1 }); }`, "list.find");
     expect(mongooseAdapter(call)).toBeNull();
   });
+
+  it("extracts eq predicates from a filter object", () => {
+    const call = firstCall(`async function r(){ await User.find({ status: "active", orgId: 3 }); }`, "User.find");
+    expect(mongooseAdapter(call)!.filters).toEqual([
+      { field: "status", value: "active", kind: "eq" },
+      { field: "orgId", value: 3, kind: "eq" },
+    ]);
+  });
+
+  it("classifies $in as 'in' and $gt as 'other'", () => {
+    const call = firstCall(`async function r(){ await User.find({ id: { $in: [1, 2] }, age: { $gt: 5 } }); }`, "User.find");
+    expect(mongooseAdapter(call)!.filters).toEqual([
+      { field: "id", kind: "in" },
+      { field: "age", kind: "other" },
+    ]);
+  });
+
+  it("flattens a $and", () => {
+    const call = firstCall(`async function r(){ await User.find({ $and: [{ status: "active" }, { orgId: 3 }] }); }`, "User.find");
+    expect(mongooseAdapter(call)!.filters).toEqual([
+      { field: "status", value: "active", kind: "eq" },
+      { field: "orgId", value: 3, kind: "eq" },
+    ]);
+  });
+
+  it("leaves filters empty with no filter argument", () => {
+    const call = firstCall(`async function r(){ await User.find(); }`, "User.find");
+    expect(mongooseAdapter(call)!.filters).toEqual([]);
+  });
 });

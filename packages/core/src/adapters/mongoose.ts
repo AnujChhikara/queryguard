@@ -1,7 +1,59 @@
-import { Node } from "ts-morph";
+import { Node, SyntaxKind } from "ts-morph";
 import type { Node as TsNode } from "ts-morph";
-import type { QueryDescriptor } from "../types.js";
+import type { QueryDescriptor, QueryFilter } from "../types.js";
 import { isInsideLoop } from "../loop.js";
+
+/** A string/number/boolean literal's value, or undefined if the node isn't one. */
+function literalValue(init: TsNode): string | number | boolean | undefined {
+  if (Node.isStringLiteral(init) || Node.isNoSubstitutionTemplateLiteral(init)) return init.getLiteralValue();
+  if (Node.isNumericLiteral(init)) return init.getLiteralValue();
+  if (init.getKind() === SyntaxKind.TrueKeyword) return true;
+  if (init.getKind() === SyntaxKind.FalseKeyword) return false;
+  return undefined;
+}
+
+/** Extracts eq/in predicates from a Mongoose filter object (handles $in/$eq/$and). */
+function extractMongooseFilters(arg: TsNode | undefined): QueryFilter[] {
+  if (!arg || !Node.isObjectLiteralExpression(arg)) return [];
+  const out: QueryFilter[] = [];
+  for (const p of arg.getProperties()) {
+    if (!Node.isPropertyAssignment(p)) continue;
+    const field = p.getName();
+    const init = p.getInitializer();
+    if (!init) continue;
+
+    if (field === "$and") {
+      if (Node.isArrayLiteralExpression(init)) {
+        for (const el of init.getElements()) out.push(...extractMongooseFilters(el));
+      }
+      continue;
+    }
+    if (field === "$or" || field === "$nor") continue; // non-matching
+
+    const lit = literalValue(init);
+    if (lit !== undefined) {
+      out.push({ field, value: lit, kind: "eq" });
+      continue;
+    }
+    if (Node.isObjectLiteralExpression(init)) {
+      if (init.getProperty("$in")) {
+        out.push({ field, kind: "in" });
+        continue;
+      }
+      const eqProp = init.getProperty("$eq");
+      if (eqProp && Node.isPropertyAssignment(eqProp)) {
+        const eqInit = eqProp.getInitializer();
+        const eqVal = eqInit ? literalValue(eqInit) : undefined;
+        out.push(eqVal !== undefined ? { field, value: eqVal, kind: "eq" } : { field, kind: "eq" });
+        continue;
+      }
+      out.push({ field, kind: "other" }); // $gt/$lt/$ne/$regex/…
+      continue;
+    }
+    out.push({ field, kind: "eq" }); // non-literal value → unknown
+  }
+  return out;
+}
 
 const READ_METHODS = new Set([
   "find", "findOne", "findById", "countDocuments", "estimatedDocumentCount",
@@ -76,10 +128,12 @@ export function mongooseAdapter(node: TsNode): QueryDescriptor | null {
     ALWAYS_FILTERED.has(method) ||
     Boolean(firstArg && Node.isObjectLiteralExpression(firstArg) && firstArg.getProperties().length > 0);
 
+  const operation = operationFor(method);
+
   return {
     db: "mongodb",
     orm: "mongoose",
-    operation: operationFor(method),
+    operation,
     target: leaf,
     node: call,
     inLoop: isInsideLoop(call),
@@ -87,6 +141,8 @@ export function mongooseAdapter(node: TsNode): QueryDescriptor | null {
     confidence: "high",
     hasLimit: hasChainedLimit(call),
     hasFilter,
+    // Only reads carry a query filter; writes/deletes pass a document or filter we don't match on.
+    filters: operation === "read" ? extractMongooseFilters(firstArg) : [],
     isAggregate: AGGREGATE_METHODS.has(method),
   };
 }
