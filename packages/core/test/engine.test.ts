@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { analyzeSource } from "../src/engine.js";
 import { parseKnowledge } from "../src/knowledge/load.js";
+import { parseConfig } from "../src/config.js";
 
 describe("analyzeSource", () => {
   it("reports n-plus-one for a prisma query in a loop", () => {
@@ -84,6 +85,27 @@ describe("analyzeSource across adapters", () => {
   it("does not double-report a Drizzle-style db.execute(sql``) query", () => {
     const diags = analyzeSource("async function r(db){ await db.execute(sql`SELECT * FROM users`); }");
     expect(diags.filter((d) => d.ruleId === "unbounded-read")).toHaveLength(1);
+  });
+});
+
+describe("analyzeSource with config", () => {
+  const code = `async function all(prisma){ return prisma.user.findMany(); }`;
+
+  it("drops a rule set to off", () => {
+    const config = parseConfig(`{ "rules": { "unbounded-read": "off" } }`, "/p");
+    const diags = analyzeSource(code, undefined, null, config);
+    expect(diags.some((d) => d.ruleId === "unbounded-read")).toBe(false);
+  });
+
+  it("overrides severity", () => {
+    const config = parseConfig(`{ "rules": { "unbounded-read": "error" } }`, "/p");
+    const diags = analyzeSource(code, undefined, null, config);
+    const d = diags.find((x) => x.ruleId === "unbounded-read")!;
+    expect(d.severity).toBe("error");
+  });
+
+  it("is byte-identical to no-config when config is null", () => {
+    expect(analyzeSource(code, undefined, null, null)).toEqual(analyzeSource(code));
   });
 });
 

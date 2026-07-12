@@ -11,6 +11,7 @@ export * from "./rules/n-plus-one.js";
 export * from "./rules/unbounded-read.js";
 export * from "./rules/over-fetch.js";
 export * from "./engine.js";
+export * from "./config.js";
 export * from "./knowledge/load.js";
 export * from "./knowledge/cardinality.js";
 export * from "./knowledge/driving-set.js";

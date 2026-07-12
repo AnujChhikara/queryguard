@@ -11,6 +11,8 @@ import { estimateCardinality } from "./knowledge/cardinality.js";
 import { resolveDrivingSet } from "./knowledge/driving-set.js";
 import { readInlineHint } from "./knowledge/hints.js";
 import { filterSuppressed } from "./knowledge/suppress.js";
+import { applyConfig } from "./config.js";
+import type { CardinalConfig } from "./config.js";
 import type { Knowledge, Cardinality } from "./knowledge/types.js";
 import type { Diagnostic, QueryDescriptor, Rule } from "./types.js";
 import type { Node } from "ts-morph";
@@ -22,6 +24,7 @@ export function analyzeSource(
   code: string,
   filePath?: string,
   knowledge?: Knowledge | null,
+  config?: CardinalConfig | null,
 ): Diagnostic[] {
   const sf = parseSource(code, filePath);
   const candidates = findQueryCandidates(sf);
@@ -73,5 +76,6 @@ export function analyzeSource(
       // Best-effort: a throwing rule is skipped, never fatal.
     }
   }
-  return filterSuppressed(diagnostics, descriptors, filePath, knowledge);
+  const suppressed = filterSuppressed(diagnostics, descriptors, filePath, knowledge);
+  return applyConfig(suppressed, config);
 }
