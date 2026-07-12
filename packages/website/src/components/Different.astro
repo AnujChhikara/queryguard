@@ -1,0 +1,171 @@
+---
+const columns = [
+  {
+    name: "Ask an AI to review",
+    highlight: false,
+    rows: [
+      ["When", "Only when you remember to"],
+      ["Cost", "Non-deterministic, burns tokens"],
+      ["Your data", "Guesses your scale"],
+    ],
+  },
+  {
+    name: "Watch prod dashboards",
+    highlight: false,
+    rows: [
+      ["When", "After users already feel it"],
+      ["Cost", "A postmortem"],
+      ["Your data", "Too late to matter"],
+    ],
+  },
+  {
+    name: "Cardinal",
+    highlight: true,
+    rows: [
+      ["When", "Every keystroke, automatically"],
+      ["Cost", "Deterministic, free, offline"],
+      ["Your data", "Knows your rows + business rules"],
+    ],
+  },
+];
+---
+
+<section class="different" id="why">
+  <div class="container">
+    <p class="eyebrow">Why Cardinal</p>
+    <h2 class="title">
+      You could ask an AI to check every query.<br />
+      <span class="mark">You won't</span> — not every time.
+    </h2>
+    <p class="lead">
+      An AI review is something you have to remember to do. Cardinal is the catch
+      that's always on — and the only one that knows how big your data actually is.
+    </p>
+
+    <div class="cols">
+      {
+        columns.map((c) => (
+          <div class:list={["col", { "col--win": c.highlight }]}>
+            <div class="col-head">
+              <span class="col-name">{c.name}</span>
+              {c.highlight && <span class="badge">You</span>}
+            </div>
+            <dl>
+              {c.rows.map(([k, v]) => (
+                <div class="pair">
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .different {
+    padding-block: clamp(3.5rem, 8vw, 6.5rem);
+    border-top: 1.5px solid var(--ink);
+  }
+  .title {
+    margin-top: 1.2rem;
+    font-size: clamp(1.9rem, 4.6vw, 3.2rem);
+    max-width: 20ch;
+  }
+  .lead {
+    margin-top: 1.6rem;
+    max-width: 52ch;
+    color: #2b2b28;
+    font-size: 1.06rem;
+  }
+  .cols {
+    margin-top: 3rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.1rem;
+    align-items: stretch;
+  }
+  .col {
+    border: 1.5px solid var(--ink);
+    border-radius: 12px;
+    padding: 1.4rem 1.4rem 0.6rem;
+    background: var(--paper);
+  }
+  .col:not(.col--win) {
+    color: var(--muted);
+  }
+  .col--win {
+    background: var(--ink);
+    color: var(--paper);
+    box-shadow: 8px 10px 0 var(--marker);
+  }
+  .col-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-bottom: 1.1rem;
+    margin-bottom: 0.4rem;
+    border-bottom: 1px solid currentColor;
+  }
+  .col-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .col--win .col-name {
+    color: var(--paper);
+  }
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--marker);
+    color: var(--ink);
+    padding: 0.2em 0.55em;
+    border-radius: 999px;
+  }
+  dl {
+    margin: 0;
+  }
+  .pair {
+    padding-block: 0.85rem;
+    border-top: 1px solid var(--grid);
+  }
+  .col--win .pair {
+    border-top-color: #2a2a28;
+  }
+  .pair:first-child {
+    border-top: 0;
+  }
+  dt {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+  dd {
+    margin: 0.25rem 0 0;
+    font-size: 0.98rem;
+    line-height: 1.4;
+  }
+  .col:not(.col--win) dd {
+    color: #47473f;
+  }
+
+  @media (max-width: 780px) {
+    .cols {
+      grid-template-columns: 1fr;
+    }
+    .col--win {
+      order: -1;
+    }
+  }
+</style>
