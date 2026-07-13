@@ -22,3 +22,4 @@ export * from "./knowledge/driving-set.js";
 export * from "./knowledge/hints.js";
 export * from "./knowledge/suppress.js";
 export * from "./knowledge/store.js";
+export * from "./knowledge/scaffold.js";

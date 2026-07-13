@@ -25,6 +25,7 @@ export function estimateCardinality(
   // with an equal value (query filters are a superset of `when`). Pick the tightest.
   let best: number | undefined;
   for (const fact of table.filters ?? []) {
+    if (typeof fact.rows !== "number") continue; // unfilled scaffold / invalid → ignore
     const matches = Object.entries(fact.when).every(([key, val]) => eq.get(key) === val);
     if (matches && (best === undefined || fact.rows < best)) best = fact.rows;
   }

@@ -1,7 +1,21 @@
 import { describe, it, expect } from "vitest";
-import { analyzeSource } from "../src/engine.js";
+import { analyzeSource, collectQueries } from "../src/engine.js";
 import { parseKnowledge } from "../src/knowledge/load.js";
 import { parseConfig } from "../src/config.js";
+
+describe("collectQueries", () => {
+  it("returns query descriptors across every adapter", () => {
+    const ds = collectQueries(`
+      async function a(prisma){ await prisma.user.findMany(); }
+      async function b(db){ await db.query.posts.findMany(); }
+      async function c(){ await Contact.find({ active: true }); }
+      async function d(sql){ await sql\`SELECT * FROM orders\`; }
+    `);
+    const targets = ds.map((d) => d.target).sort();
+    expect(targets).toEqual(["Contact", "orders", "posts", "user"]);
+    expect(ds.find((d) => d.target === "posts")!.orm).toBe("drizzle");
+  });
+});
 
 describe("analyzeSource", () => {
   it("reports n-plus-one for a prisma query in a loop", () => {

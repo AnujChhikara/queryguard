@@ -54,4 +54,24 @@ describe("estimateCardinality", () => {
     expect(estimateCardinality(d, null).bound).toBe("unknown");
     expect(estimateCardinality(d, knowledge).bound).toBe("unknown");
   });
+
+  it("ignores facts/tables with a non-numeric rows value (inert scaffold)", () => {
+    // A freshly-scaffolded file leaves `rows:` empty (parses as null) — must not
+    // be treated as ~0 rows.
+    const scaffold = parseKnowledge(
+      `version: 1
+tables:
+  user:
+    rows:
+    filters:
+      - when: { status: active }
+        rows:
+`,
+      "/p",
+    );
+    const filtered = descriptor(`async function r(prisma){ await prisma.user.findMany({ where: { status: "active" } }); }`, "prisma.user.findMany");
+    expect(estimateCardinality(filtered, scaffold).bound).toBe("unknown");
+    const unfiltered = descriptor(`async function r(prisma){ await prisma.user.findMany(); }`, "prisma.user.findMany");
+    expect(estimateCardinality(unfiltered, scaffold).bound).toBe("unknown");
+  });
 });

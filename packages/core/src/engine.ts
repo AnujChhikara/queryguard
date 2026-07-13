@@ -32,17 +32,11 @@ const rules: Rule[] = [
   excessiveJoinsRule,
 ];
 
-export function analyzeSource(
-  code: string,
-  filePath?: string,
-  knowledge?: Knowledge | null,
-  config?: CardinalConfig | null,
-): Diagnostic[] {
+/** Every query Cardinal recognizes in a source string (first matching adapter wins). */
+export function collectQueries(code: string, filePath?: string): QueryDescriptor[] {
   const sf = parseSource(code, filePath);
-  const candidates = findQueryCandidates(sf);
-
   const descriptors: QueryDescriptor[] = [];
-  for (const candidate of candidates) {
+  for (const candidate of findQueryCandidates(sf)) {
     for (const adapter of adapters) {
       const descriptor = adapter(candidate);
       if (descriptor) {
@@ -51,6 +45,16 @@ export function analyzeSource(
       }
     }
   }
+  return descriptors;
+}
+
+export function analyzeSource(
+  code: string,
+  filePath?: string,
+  knowledge?: Knowledge | null,
+  config?: CardinalConfig | null,
+): Diagnostic[] {
+  const descriptors = collectQueries(code, filePath);
 
   const cardCache = new Map<QueryDescriptor, Cardinality>();
   const cardinalityOf = (d: QueryDescriptor): Cardinality => {
