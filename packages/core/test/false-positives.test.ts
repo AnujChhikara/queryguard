@@ -14,6 +14,8 @@ const clean: Record<string, string> = {
   "entity-manager flush in a loop": `async function r(em, xs){ for (const x of xs){ await em.flush(); } }`,
   "logger.getLevel in a loop": `async function r(logger, xs){ for (const x of xs){ await logger.getLevel(); } }`,
   "config store.get in a loop": `async function r(store, keys){ for (const k of keys){ await store.get(k); } }`,
+  "prisma findFirst (single row, implicit LIMIT 1)": `async function r(){ return prisma.user.findFirst(); }`,
+  "prisma findFirstOrThrow (single row)": `async function r(){ return prisma.user.findFirstOrThrow(); }`,
 };
 
 describe("false-positive corpus (must stay clean)", () => {

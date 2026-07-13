@@ -7,6 +7,8 @@ const READ_METHODS = new Set(["findMany", "findFirst", "findUnique", "findUnique
 const WRITE_METHODS = new Set(["create", "createMany", "update", "updateMany", "upsert"]);
 const DELETE_METHODS = new Set(["delete", "deleteMany"]);
 const AGGREGATE_METHODS = new Set(["count", "aggregate", "groupBy"]);
+// Return at most one row — an implicit LIMIT 1, so never "unbounded".
+const SINGLE_ROW_METHODS = new Set(["findFirst", "findUnique", "findUniqueOrThrow", "findFirstOrThrow"]);
 
 function operationFor(method: string): QueryDescriptor["operation"] {
   if (READ_METHODS.has(method)) return "read";
@@ -104,7 +106,7 @@ export function prismaAdapter(node: TsNode): QueryDescriptor | null {
     inLoop: isInsideLoop(call),
     awaited: isAwaited,
     confidence: "high",
-    hasLimit: options.hasLimit,
+    hasLimit: options.hasLimit || SINGLE_ROW_METHODS.has(method),
     hasFilter: options.hasFilter,
     selectedFields: options.selectedFields,
     filters: options.filters,
