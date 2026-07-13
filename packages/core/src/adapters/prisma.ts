@@ -45,14 +45,21 @@ function extractFilters(whereInit: unknown): QueryFilter[] {
 }
 
 function readOptions(call: CallExpression): {
-  hasLimit: boolean;
-  hasFilter: boolean;
+  hasLimit: boolean | undefined;
+  hasFilter: boolean | undefined;
   selectedFields: string[];
   filters: QueryFilter[];
 } {
   const [firstArg] = call.getArguments();
-  if (!firstArg || !Node.isObjectLiteralExpression(firstArg)) {
+  // No argument at all — genuinely unfiltered and unlimited.
+  if (!firstArg) {
     return { hasLimit: false, hasFilter: false, selectedFields: [], filters: [] };
+  }
+  // An opaque argument (a variable/spread we can't read statically, e.g.
+  // findMany(args)) — we don't know if it filters/limits, so report unknown
+  // rather than falsely claiming an unbounded scan.
+  if (!Node.isObjectLiteralExpression(firstArg)) {
+    return { hasLimit: undefined, hasFilter: undefined, selectedFields: [], filters: [] };
   }
   const hasProp = (name: string) => Boolean(firstArg.getProperty(name));
   const selectProp = firstArg.getProperty("select");
@@ -106,7 +113,9 @@ export function prismaAdapter(node: TsNode): QueryDescriptor | null {
     inLoop: isInsideLoop(call),
     awaited: isAwaited,
     confidence: "high",
-    hasLimit: options.hasLimit || SINGLE_ROW_METHODS.has(method),
+    // Single-row reads are always bounded; otherwise keep the (possibly
+    // unknown) limit we read from the options object.
+    hasLimit: SINGLE_ROW_METHODS.has(method) ? true : options.hasLimit,
     hasFilter: options.hasFilter,
     selectedFields: options.selectedFields,
     filters: options.filters,

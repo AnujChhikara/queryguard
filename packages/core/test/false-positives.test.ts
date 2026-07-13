@@ -20,6 +20,13 @@ const clean: Record<string, string> = {
   "drizzle findFirst (single row)": `async function r(db){ return db.query.users.findFirst(); }`,
   "raw SELECT with no table (health check)": "async function r(db){ return db.query(`SELECT 1`); }",
   "raw SELECT NOW() (no table)": "async function r(db){ return db.query(`SELECT NOW()`); }",
+  "prisma create in a loop (write, not N+1)": `async function r(items){ for (const i of items){ await prisma.user.create({ data: i }); } }`,
+  "prisma update in a transaction loop (write)": `async function r(tx, items){ for (const i of items){ await tx.audit.update({ where: { id: i.id }, data: i }); } }`,
+  "mongoose save in a loop (write)": `async function r(docs){ for (const d of docs){ await d.save(); } }`,
+  "playwright locator .count() in a loop": `async function r(locators){ for (const loc of locators){ await loc.count(); } }`,
+  "API client .list() in a loop": `async function r(client, pages){ for (const p of pages){ await client.events.list(p); } }`,
+  "mail fixture .search() in a loop": `async function r(emails, users){ for (const u of users){ await emails.search(u.email); } }`,
+  "prisma findMany with opaque args (filter passed as variable)": `async function r(args){ return prisma.user.findMany(args); }`,
 };
 
 describe("false-positive corpus (must stay clean)", () => {
@@ -43,8 +50,18 @@ describe("true positives still fire (no over-correction)", () => {
     expect(diags.some((d) => d.ruleId === "n-plus-one")).toBe(true);
   });
 
+  it("still flags a findBy* repository call in a loop (strong verb, any receiver)", () => {
+    const diags = analyzeSource(`async function r(svc, emails){ for (const e of emails){ await svc.findByEmail(e); } }`);
+    expect(diags.some((d) => d.ruleId === "n-plus-one")).toBe(true);
+  });
+
   it("still warns on an unfiltered mongoose find() (returns many)", () => {
     const diags = analyzeSource(`async function r(){ return User.find(); }`);
+    expect(diags.some((d) => d.ruleId === "unbounded-read")).toBe(true);
+  });
+
+  it("still warns on prisma findMany() with no arguments at all (genuinely unbounded)", () => {
+    const diags = analyzeSource(`async function r(){ return prisma.user.findMany(); }`);
     expect(diags.some((d) => d.ruleId === "unbounded-read")).toBe(true);
   });
 

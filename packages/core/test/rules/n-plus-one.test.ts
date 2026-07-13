@@ -47,6 +47,15 @@ describe("nPlusOneRule", () => {
     expect(nPlusOneRule.match(ctx)[0].severity).toBe("error");
   });
 
+  it("does not flag prisma writes (create/update/delete) in a loop — N+1 is a read pattern", () => {
+    const ctx = {
+      descriptors: descriptors(
+        `async function r(prisma, items){ for (const i of items){ await prisma.user.create({ data: i }); await prisma.audit.update({ where: { id: i.id }, data: i }); await prisma.tag.delete({ where: { id: i.id } }); } }`,
+      ),
+    };
+    expect(nPlusOneRule.match(ctx)).toHaveLength(0);
+  });
+
   it("flags prisma.user.count() inside a loop as n-plus-one error (aggregate stays a read)", () => {
     const ctx = { descriptors: descriptors(`async function r(prisma, items){ for (const item of items){ await prisma.user.count({ where: { orgId: item.id } }); } }`) };
     const diags = nPlusOneRule.match(ctx);

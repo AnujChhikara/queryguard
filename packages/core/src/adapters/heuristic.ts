@@ -4,16 +4,21 @@ import type { QueryDescriptor } from "../types.js";
 import { isInsideLoop } from "../loop.js";
 
 // Strong verbs are specific enough to a data read that they match on any
-// receiver (e.g. `User.find(...)`, `repo.query(...)`).
+// receiver (e.g. `User.find(...)`, `repo.query(...)`). Kept deliberately to the
+// ORM-shaped names that rarely collide with non-DB APIs.
 const STRONG_VERBS = new Set([
   "find", "findone", "findbyid", "findmany", "findfirst", "findunique",
-  "query", "select", "aggregate", "count", "list", "search",
+  "query", "aggregate",
 ]);
 
-// Weak verbs are ambiguous with everyday JS (`cache.get`, `logger.getLevel`,
-// `store.get`), so they only count as a query when the *receiver* also looks
-// like a data source. This keeps the fallback adapter from crying wolf.
-const WEAK_VERBS = new Set(["get", "fetch", "retrieve", "load", "lookup", "exists"]);
+// Weak verbs are ambiguous with everyday JS and non-DB APIs (`cache.get`,
+// `logger.getLevel`, Playwright `locator.count()`, Google API `client.list()`,
+// `emails.search()`), so they only count as a query when the *receiver* also
+// looks like a data source. This keeps the fallback adapter from crying wolf.
+const WEAK_VERBS = new Set([
+  "get", "fetch", "retrieve", "load", "lookup", "exists",
+  "count", "list", "search", "select",
+]);
 
 // Only unambiguous data-source identifiers. Deliberately excludes generic names
 // (store, em, model, collection) that are as likely to be Redux/entities/arrays.

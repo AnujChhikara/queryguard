@@ -9,7 +9,11 @@ export const nPlusOneRule: Rule = {
   match(ctx) {
     const loopBoundOf = ctx.loopBoundOf ?? (() => UNKNOWN);
     return ctx.descriptors
-      .filter((d: QueryDescriptor) => d.inLoop)
+      // N+1 is a *read* amplification pattern. Writes/deletes in a loop (bulk
+      // inserts, per-row audit logs in a transaction) are a different concern
+      // and usually deliberate, so we don't flag them here. Heuristic matches
+      // have unknown operation but query-shaped verbs, so they count as reads.
+      .filter((d: QueryDescriptor) => d.inLoop && (d.operation === "read" || d.operation === "unknown"))
       .flatMap((d: QueryDescriptor) => {
         const { bound, count } = loopBoundOf(d);
         if (bound === "small") return []; // provably bounded — suppress
