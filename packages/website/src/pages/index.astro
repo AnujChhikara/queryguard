@@ -10,7 +10,7 @@ import Footer from "../components/Footer.astro";
 
 const title = "Cardinal - a database linter for TypeScript & JavaScript";
 const description =
-  "A static linter for TypeScript & JavaScript that catches N+1 loops, unbounded reads, and over-fetching in Prisma, Drizzle, Mongoose, and raw SQL - right in your editor, 100% offline.";
+  "A static linter for TypeScript & JavaScript that catches N+1 loops, unbounded reads, and over-fetching in Prisma, Drizzle, Mongoose, TypeORM, and raw SQL - right in your editor, 100% offline.";
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL("/og.png", Astro.site).href;
@@ -42,7 +42,7 @@ const jsonLd = {
     <link rel="canonical" href={canonical} />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="Anuj Chhikara" />
-    <meta name="keywords" content="database linter, N+1 query, Prisma, Drizzle, Mongoose, SQL, TypeScript, JavaScript, static analysis, VS Code extension, query optimization, ORM" />
+    <meta name="keywords" content="database linter, N+1 query, Prisma, Drizzle, Mongoose, TypeORM, SQL, TypeScript, JavaScript, static analysis, VS Code extension, query optimization, ORM" />
     <meta name="theme-color" content="#f8f8f6" />
 
     <!-- Open Graph -->
