@@ -14,9 +14,10 @@ database connection; your code never leaves your machine.
 > **Status:** early. Today Cardinal ships a core engine, a CLI, and a VS Code
 > extension with six rules (`n-plus-one`, `unbounded-read`, `over-fetch`,
 > `order-by-rand`, `leading-wildcard-like`, `excessive-joins`), adapters for
-> **Prisma, Drizzle, Mongoose, and raw SQL** (the last parsed with a real SQL
-> parser), an optional **knowledge file** that makes the rules scale-aware, and a
-> **config file** to tune them. See [Roadmap](#roadmap) for what's next.
+> **Prisma, Drizzle, Mongoose, TypeORM, and raw SQL** (the last parsed with a
+> real SQL parser), an optional **knowledge file** that makes the rules
+> scale-aware, and a **config file** to tune them. See [Roadmap](#roadmap) for
+> what's next.
 
 ## What's here
 
@@ -94,7 +95,7 @@ The fix (single query, no loop) reports zero problems and exits `0`:
 const users = await prisma.user.findMany({ where: { active: true }, include: { posts: true } })
 ```
 
-For a fuller tour across Prisma, Drizzle, Mongoose, and raw SQL, run the CLI on
+For a fuller tour across Prisma, Drizzle, Mongoose, TypeORM, and raw SQL, run the CLI on
 [`examples/anti-patterns.ts`](examples/anti-patterns.ts).
 
 ## Machine-readable output (for AI agents)
@@ -264,7 +265,7 @@ releases to the **VS Code Marketplace**, **Open VSX**, and **npm** (automated on
 a version tag — see [`PUBLISHING.md`](PUBLISHING.md)). Next:
 
 - More parser-backed SQL rules: subqueries, `HAVING`/`GROUP BY` misuse, `SELECT *`.
-- More engines (MySQL/PlanetScale/Postgres limits) and data layers (TypeORM, Kysely).
+- More engines (MySQL/PlanetScale/Postgres limits) and data layers (Kysely, Sequelize).
 - Deep mode: cross-module data-flow and schema-aware checks.
 
 ## License
