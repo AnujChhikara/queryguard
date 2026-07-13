@@ -144,6 +144,15 @@ tables:
         rows: 10
 ```
 
+**Don't start from a blank file — run `cardinal init`.** It scans your code and
+scaffolds the knowledge file for you: every table you query, plus the exact filter
+subsets your code uses (e.g. `status = 'active'`), each with a copy-pasteable
+`count(*)` query. You just fill in the numbers.
+
+```bash
+node packages/cli/dist/bin.js init     # writes cardinal.knowledge.yaml
+```
+
 With this file Cardinal **silences** loops over provably-small sets,
 **escalates** loops over provably-large sets, and warns (`over-fetch`) when an
 unfiltered read on a large table has a selective alternative. Cardinal

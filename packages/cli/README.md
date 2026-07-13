@@ -10,9 +10,10 @@ npm i -D cardinal-cli
 npx cardinal "src/**/*.ts"
 ```
 
-Flags: `--knowledge <path>` / `--no-knowledge` (data-scale facts),
-`--no-config` (ignore `cardinal.config`). Suppress a finding with
-`cardinal suppress <file>:<line>`.
+Scaffold a knowledge file from your code with `cardinal init` (finds your tables
+and the filter subsets you query by). Flags: `--knowledge <path>` /
+`--no-knowledge` (data-scale facts), `--no-config` (ignore `cardinal.config`).
+Suppress a finding with `cardinal suppress <file>:<line>`.
 
 See the [main README](https://github.com/AnujChhikara/cardinal#readme) for the
 knowledge file, config, and rule details. MIT.
