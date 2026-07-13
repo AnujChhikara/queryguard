@@ -63,7 +63,8 @@ export function resolveDrivingSet(
 
   let init = decls[0].getInitializer();
   if (init && Node.isAwaitExpression(init)) init = init.getExpression();
-  if (!init || !Node.isCallExpression(init)) return UNKNOWN;
+  // A known query call or a raw-SQL tagged template (`sql`…``).
+  if (!init || !(Node.isCallExpression(init) || Node.isTaggedTemplateExpression(init))) return UNKNOWN;
 
   const producer = descriptors.find((d) => d.node.getStart() === init!.getStart());
   if (!producer) return UNKNOWN;

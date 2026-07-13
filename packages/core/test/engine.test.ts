@@ -123,6 +123,71 @@ describe("analyzeSource with config", () => {
   });
 });
 
+describe("knowledge-aware silencing across adapters", () => {
+  const knowledge = parseKnowledge(
+    `version: 1
+tables:
+  users:
+    rows: 10000
+    filters:
+      - when: { status: active }
+        rows: 10
+  User:
+    rows: 10000
+    filters:
+      - when: { status: active }
+        rows: 10
+`,
+    "/p",
+  );
+
+  it("silences n-plus-one for a Drizzle loop over a provably-small set", () => {
+    const diags = analyzeSource(
+      `async function r(db){
+        const active = await db.query.users.findMany({ where: eq(users.status, "active") });
+        for (const u of active) { await db.query.posts.findMany({ where: eq(posts.authorId, u.id) }); }
+      }`,
+      undefined,
+      knowledge,
+    );
+    expect(diags.filter((d) => d.ruleId === "n-plus-one")).toHaveLength(0);
+  });
+
+  it("silences n-plus-one for a Mongoose loop over a provably-small set", () => {
+    const diags = analyzeSource(
+      `async function r(){
+        const active = await User.find({ status: "active" });
+        for (const u of active) { await Post.findOne({ author: u.id }); }
+      }`,
+      undefined,
+      knowledge,
+    );
+    expect(diags.filter((d) => d.ruleId === "n-plus-one")).toHaveLength(0);
+  });
+
+  it("silences n-plus-one for a raw-SQL loop over a provably-small set", () => {
+    const diags = analyzeSource(
+      "async function r(sql){\n" +
+        "  const active = await sql`SELECT * FROM users WHERE status = 'active'`;\n" +
+        "  for (const u of active) { await sql`SELECT id FROM posts WHERE author_id = ${u.id}`; }\n" +
+        "}",
+      undefined,
+      knowledge,
+    );
+    expect(diags.filter((d) => d.ruleId === "n-plus-one")).toHaveLength(0);
+  });
+
+  it("still flags n-plus-one for those loops with no knowledge file", () => {
+    const diags = analyzeSource(
+      `async function r(db){
+        const active = await db.query.users.findMany({ where: eq(users.status, "active") });
+        for (const u of active) { await db.query.posts.findMany({ where: eq(posts.authorId, u.id) }); }
+      }`,
+    );
+    expect(diags.some((d) => d.ruleId === "n-plus-one")).toBe(true);
+  });
+});
+
 describe("analyzeSource with knowledge", () => {
   const knowledge = parseKnowledge(
     `version: 1

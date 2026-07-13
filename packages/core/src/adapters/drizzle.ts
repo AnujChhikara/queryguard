@@ -1,9 +1,67 @@
-import { Node } from "ts-morph";
+import { Node, SyntaxKind } from "ts-morph";
 import type { Node as TsNode } from "ts-morph";
-import type { QueryDescriptor } from "../types.js";
+import type { QueryDescriptor, QueryFilter } from "../types.js";
 import { isInsideLoop } from "../loop.js";
 
 const READ_METHODS = new Set(["findMany", "findFirst"]);
+
+function literalValue(node: TsNode): string | number | boolean | undefined {
+  if (Node.isStringLiteral(node) || Node.isNoSubstitutionTemplateLiteral(node)) return node.getLiteralValue();
+  if (Node.isNumericLiteral(node)) return node.getLiteralValue();
+  if (node.getKind() === SyntaxKind.TrueKeyword) return true;
+  if (node.getKind() === SyntaxKind.FalseKeyword) return false;
+  return undefined;
+}
+
+/** The column name from a `table.column` reference or a bare identifier. */
+function columnLeaf(node: TsNode | undefined): string | undefined {
+  if (!node) return undefined;
+  if (Node.isPropertyAccessExpression(node)) return node.getName();
+  if (Node.isIdentifier(node)) return node.getText();
+  return undefined;
+}
+
+/**
+ * Walks Drizzle's operator-function `where` (eq/and/inArray/…). `matchable` turns
+ * false under or()/not(), where predicates can't be superset-matched as eq.
+ */
+function walkDrizzle(node: TsNode | undefined, out: QueryFilter[], matchable: boolean): void {
+  if (!node || !Node.isCallExpression(node)) return;
+  const callee = node.getExpression();
+  const name = Node.isIdentifier(callee)
+    ? callee.getText()
+    : Node.isPropertyAccessExpression(callee)
+      ? callee.getName()
+      : "";
+  const args = node.getArguments();
+
+  if (name === "and") {
+    for (const a of args) walkDrizzle(a, out, matchable);
+    return;
+  }
+  if (name === "or" || name === "not") {
+    for (const a of args) walkDrizzle(a, out, false);
+    return;
+  }
+
+  const field = columnLeaf(args[0]);
+  if (!field) return;
+
+  if (name === "eq" && matchable) {
+    const value = literalValue(args[1]);
+    out.push(value !== undefined ? { field, value, kind: "eq" } : { field, kind: "eq" });
+  } else if (name === "inArray" && matchable) {
+    out.push({ field, kind: "in" });
+  } else {
+    out.push({ field, kind: "other" }); // ne/gt/lt/like/eq-under-or/…
+  }
+}
+
+function extractDrizzleFilters(whereInit: TsNode | undefined): QueryFilter[] {
+  const out: QueryFilter[] = [];
+  walkDrizzle(whereInit, out, true);
+  return out;
+}
 
 /**
  * Drizzle's relational query API: `db.query.<table>.findMany|findFirst({...})`.
@@ -33,6 +91,10 @@ export function drizzleAdapter(node: TsNode): QueryDescriptor | null {
   const opts = firstArg && Node.isObjectLiteralExpression(firstArg) ? firstArg : undefined;
   const hasProp = (name: string) => Boolean(opts?.getProperty(name));
 
+  const whereProp = opts?.getProperty("where");
+  const whereInit =
+    whereProp && Node.isPropertyAssignment(whereProp) ? whereProp.getInitializer() : undefined;
+
   return {
     db: "unknown",
     orm: "drizzle",
@@ -44,6 +106,7 @@ export function drizzleAdapter(node: TsNode): QueryDescriptor | null {
     confidence: "high",
     hasLimit: hasProp("limit"),
     hasFilter: hasProp("where"),
+    filters: extractDrizzleFilters(whereInit),
     isAggregate: false,
   };
 }

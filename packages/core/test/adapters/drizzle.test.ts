@@ -57,4 +57,41 @@ describe("drizzleAdapter", () => {
     const call = firstCall(`async function r(db){ await db.user.findMany(); }`, "db.user.findMany");
     expect(drizzleAdapter(call)).toBeNull();
   });
+
+  it("extracts an eq() predicate from where", () => {
+    const call = firstCall(
+      `async function r(db){ await db.query.users.findMany({ where: eq(users.status, "active") }); }`,
+      "db.query.users.findMany",
+    );
+    expect(drizzleAdapter(call)!.filters).toEqual([{ field: "status", value: "active", kind: "eq" }]);
+  });
+
+  it("flattens and() and marks inArray() as 'in'", () => {
+    const call = firstCall(
+      `async function r(db, ids){ await db.query.users.findMany({ where: and(eq(users.status, "active"), inArray(users.id, ids)) }); }`,
+      "db.query.users.findMany",
+    );
+    expect(drizzleAdapter(call)!.filters).toEqual([
+      { field: "status", value: "active", kind: "eq" },
+      { field: "id", kind: "in" },
+    ]);
+  });
+
+  it("treats a non-literal eq value as unknown, and gt()/or() as 'other'", () => {
+    const nonLit = firstCall(
+      `async function r(db, s){ await db.query.users.findMany({ where: eq(users.status, s) }); }`,
+      "db.query.users.findMany",
+    );
+    expect(drizzleAdapter(nonLit)!.filters).toEqual([{ field: "status", kind: "eq" }]);
+    const gt = firstCall(
+      `async function r(db){ await db.query.users.findMany({ where: gt(users.age, 5) }); }`,
+      "db.query.users.findMany",
+    );
+    expect(drizzleAdapter(gt)!.filters).toEqual([{ field: "age", kind: "other" }]);
+  });
+
+  it("leaves filters empty when there is no where", () => {
+    const call = firstCall(`async function r(db){ return db.query.users.findMany(); }`, "db.query.users.findMany");
+    expect(drizzleAdapter(call)!.filters).toEqual([]);
+  });
 });

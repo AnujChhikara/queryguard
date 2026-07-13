@@ -20,7 +20,9 @@ import type { Knowledge, Cardinality } from "./knowledge/types.js";
 import type { Diagnostic, QueryDescriptor, Rule } from "./types.js";
 import type { Node } from "ts-morph";
 
-const adapters: Array<(node: Node) => QueryDescriptor | null> = [prismaAdapter, drizzleAdapter, mongooseAdapter, rawSqlAdapter, heuristicAdapter];
+// Drizzle before Prisma: `db.query.<table>.findMany` also fits Prisma's
+// `base.model.method` shape, so the more specific `.query.` matcher must win.
+const adapters: Array<(node: Node) => QueryDescriptor | null> = [drizzleAdapter, prismaAdapter, mongooseAdapter, rawSqlAdapter, heuristicAdapter];
 const rules: Rule[] = [
   nPlusOneRule,
   unboundedReadRule,

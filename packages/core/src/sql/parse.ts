@@ -120,9 +120,9 @@ export function extractSqlFilters(text: string): QueryFilter[] {
   if (!/\bWHERE\b/i.test(text)) return [];
   try {
     const ast = parser.astify(normalize(text));
-    const stmt = Array.isArray(ast) ? ast[0] : ast;
+    const stmt = (Array.isArray(ast) ? ast[0] : ast) as unknown as SqlNode | undefined;
     const out: QueryFilter[] = [];
-    walkWhere((stmt as SqlNode | undefined)?.where, out);
+    walkWhere(stmt?.where, out);
     return out;
   } catch {
     return [];
