@@ -12,8 +12,9 @@ npx cardinal "src/**/*.ts"
 
 Scaffold a knowledge file from your code with `cardinal init` (finds your tables
 and the filter subsets you query by). Flags: `--knowledge <path>` /
-`--no-knowledge` (data-scale facts), `--no-config` (ignore `cardinal.config`).
-Suppress a finding with `cardinal suppress <file>:<line>`.
+`--no-knowledge` (data-scale facts), `--no-config` (ignore `cardinal.config`),
+`--format json` (machine-readable findings for AI agents / CI — each with a
+why/fix explanation). Suppress a finding with `cardinal suppress <file>:<line>`.
 
 See the [main README](https://github.com/AnujChhikara/cardinal#readme) for the
 knowledge file, config, and rule details. MIT.

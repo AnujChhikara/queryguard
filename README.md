@@ -97,6 +97,44 @@ const users = await prisma.user.findMany({ where: { active: true }, include: { p
 For a fuller tour across Prisma, Drizzle, Mongoose, and raw SQL, run the CLI on
 [`examples/anti-patterns.ts`](examples/anti-patterns.ts).
 
+## Machine-readable output (for AI agents)
+
+Cardinal doesn't rewrite your code — but it hands an AI agent everything needed
+to. Run with `--format json` and each finding comes with its location, message,
+and a reusable `why`/`fix` explanation:
+
+```bash
+node packages/cli/dist/bin.js --format json "src/**/*.ts"
+```
+
+```jsonc
+{
+  "tool": "cardinal",
+  "version": 1,
+  "summary": { "problems": 2, "errors": 1 },
+  "findings": [
+    {
+      "ruleId": "n-plus-one",
+      "severity": "error",
+      "file": "src/orders.ts",
+      "line": 3, "column": 25,
+      "message": "Query on \"post\" runs inside a loop (N+1)...",
+      "explanation": {
+        "why": "A query awaited inside a loop runs once per iteration — 1 + N round trips...",
+        "fix": "Hoist the query out of the loop: collect the keys, run one batched query..."
+      }
+    }
+  ]
+}
+```
+
+The `message` carries the finding's specifics (target table, cardinality from
+your knowledge file — the one thing an agent can't infer from source); the
+`explanation` carries the reusable reasoning and fix. Point an agent at it
+("run `cardinal check --format json` and fix every error") or post it on a PR.
+Status notices go to stderr, so stdout stays pure JSON. Cardinal stays 100%
+static — it finds and explains; your agent applies the edit.
+
 ## Rules
 
 Every diagnostic links here. Severities are defaults — override any of them (or
@@ -220,9 +258,10 @@ Rule-authoring reference: [`docs/database-knowledge/`](docs/database-knowledge/)
 
 Shipped: config file, a real SQL parser, **context-awareness across all adapters**
 (the knowledge file's `over-fetch` / cardinality now work for Drizzle, Mongoose,
-and raw SQL, not just Prisma), and releases to the **VS Code Marketplace**,
-**Open VSX**, and **npm** (automated on a version tag — see
-[`PUBLISHING.md`](PUBLISHING.md)). Next:
+and raw SQL, not just Prisma), **machine-readable `--format json`** output (each
+finding carries a why/fix explanation, so an AI agent can apply the fix), and
+releases to the **VS Code Marketplace**, **Open VSX**, and **npm** (automated on
+a version tag — see [`PUBLISHING.md`](PUBLISHING.md)). Next:
 
 - More parser-backed SQL rules: subqueries, `HAVING`/`GROUP BY` misuse, `SELECT *`.
 - More engines (MySQL/PlanetScale/Postgres limits) and data layers (TypeORM, Kysely).

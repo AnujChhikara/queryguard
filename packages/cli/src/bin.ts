@@ -8,19 +8,22 @@ function parseArgs(argv: string[]): {
   knowledgePath?: string;
   noKnowledge: boolean;
   noConfig: boolean;
+  format: "text" | "json";
 } {
   const patterns: string[] = [];
   let knowledgePath: string | undefined;
   let noKnowledge = false;
   let noConfig = false;
+  let format: "text" | "json" = "text";
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--no-knowledge") noKnowledge = true;
     else if (a === "--no-config") noConfig = true;
     else if (a === "--knowledge") knowledgePath = argv[++i];
+    else if (a === "--format") format = argv[++i] === "json" ? "json" : "text";
     else patterns.push(a);
   }
-  return { patterns, knowledgePath, noKnowledge, noConfig };
+  return { patterns, knowledgePath, noKnowledge, noConfig, format };
 }
 
 async function main() {
@@ -53,11 +56,11 @@ async function main() {
     process.exit(res.code);
   }
 
-  const { patterns, knowledgePath, noKnowledge, noConfig } = parseArgs(argv);
+  const { patterns, knowledgePath, noKnowledge, noConfig, format } = parseArgs(argv);
   if (patterns.length === 0) {
     console.error(
       "usage:\n" +
-        "  cardinal [--knowledge <path>] [--no-knowledge] [--no-config] <glob> [glob...]\n" +
+        "  cardinal [--knowledge <path>] [--no-knowledge] [--no-config] [--format text|json] <glob> [glob...]\n" +
         "  cardinal init [glob...] [--force]     scaffold a cardinal.knowledge.yaml\n" +
         "  cardinal suppress <file>:<line>       silence a finding",
     );
@@ -78,10 +81,15 @@ async function main() {
 
   const { diagnostics, errorCount } = await run(patterns, process.cwd(), { knowledge, config });
 
-  for (const d of diagnostics) {
-    console.log(`${d.file}:${d.range.line}:${d.range.column}  ${d.severity}  ${d.ruleId}  ${d.message}`);
+  if (format === "json") {
+    const { formatJson } = await import("./format.js");
+    console.log(formatJson(diagnostics, errorCount));
+  } else {
+    for (const d of diagnostics) {
+      console.log(`${d.file}:${d.range.line}:${d.range.column}  ${d.severity}  ${d.ruleId}  ${d.message}`);
+    }
+    console.log(`\n${diagnostics.length} problem(s), ${errorCount} error(s)`);
   }
-  console.log(`\n${diagnostics.length} problem(s), ${errorCount} error(s)`);
   process.exit(errorCount > 0 ? 1 : 0);
 }
 
