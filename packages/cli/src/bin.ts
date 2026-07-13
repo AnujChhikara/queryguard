@@ -25,6 +25,14 @@ function parseArgs(argv: string[]): {
 
 async function main() {
   const argv = process.argv.slice(2);
+  if (argv[0] === "init") {
+    const rest = argv.slice(1);
+    const patterns = rest.filter((a) => !a.startsWith("--"));
+    const { initCommand } = await import("./init.js");
+    const res = await initCommand(patterns, process.cwd(), { force: rest.includes("--force") });
+    console.log(res.message);
+    process.exit(res.code);
+  }
   if (argv[0] === "suppress") {
     const { createInterface } = await import("node:readline/promises");
     const rest = argv.slice(1);
@@ -47,7 +55,12 @@ async function main() {
 
   const { patterns, knowledgePath, noKnowledge, noConfig } = parseArgs(argv);
   if (patterns.length === 0) {
-    console.error("usage: cardinal [--knowledge <path>] [--no-knowledge] [--no-config] <glob> [glob...]");
+    console.error(
+      "usage:\n" +
+        "  cardinal [--knowledge <path>] [--no-knowledge] [--no-config] <glob> [glob...]\n" +
+        "  cardinal init [glob...] [--force]     scaffold a cardinal.knowledge.yaml\n" +
+        "  cardinal suppress <file>:<line>       silence a finding",
+    );
     process.exit(2);
   }
 
