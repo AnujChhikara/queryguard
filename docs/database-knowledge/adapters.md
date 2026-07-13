@@ -13,15 +13,16 @@ different data layers.
 | Adapter | Confidence | `operation` | `target` | `hasFilter` | `hasLimit` | `filters[]` values | Aggregates |
 |---------|-----------|-------------|----------|-------------|------------|--------------------|-----------|
 | **Prisma** | high | ✅ | model | ✅ | ✅ (`take`) | ✅ (eq/in/other) | ✅ |
-| **Drizzle** | high | read-only | table | ✅ (`where`) | ✅ (`limit`) | ⛔ deferred | — |
-| **Mongoose** | high | ✅ | model | ✅ | ✅ (chained `.limit()`) | ⛔ deferred | ✅ |
-| **Raw SQL** | high | ✅ | `FROM`/`INTO`/`UPDATE` table | ✅ (`WHERE`) | ✅ (`LIMIT`) | ⛔ deferred | ✅ |
+| **Drizzle** | high | read-only | table | ✅ (`where`) | ✅ (`limit`) | ✅ (`eq`/`inArray`/`and`) | — |
+| **Mongoose** | high | ✅ | model | ✅ | ✅ (chained `.limit()`) | ✅ (`$in`/`$eq`/`$and`) | ✅ |
+| **Raw SQL** | high | ✅ | `FROM`/`INTO`/`UPDATE` table | ✅ (`WHERE`) | ✅ (`LIMIT`) | ✅ (parsed `WHERE`) | ✅ |
 | **Heuristic** | heuristic | unknown | method name | ⛔ | ⛔ | ⛔ | ⛔ |
 
-Only Prisma extracts predicate **values** into `filters[]`, so the
-knowledge-driven rules (`over-fetch`, cardinality silencing/escalation, the
-driving-set trace) apply to Prisma only. For the other adapters, `n-plus-one`
-and `unbounded-read` fire structurally; nothing is silenced on a guess.
+All four high-confidence adapters extract predicate **values** into `filters[]`,
+so the knowledge-driven rules (`over-fetch`, cardinality silencing/escalation, the
+driving-set trace) work across Prisma, Drizzle, Mongoose, and raw SQL. Only
+AND-connected `eq` predicates with a concrete literal value participate in fact
+matching; `in` is marked, and `or`/ranges/interpolated values are non-matching.
 
 ## Drizzle
 
@@ -61,9 +62,10 @@ and `unbounded-read` fire structurally; nothing is silenced on a guess.
   `hasFilter`/`hasLimit`; `COUNT(`/`SUM(`/… → `isAggregate`. Unrecognized text
   returns nothing (no false finding). A full SQL parser is a documented follow-up.
 
-## Deferred (all non-Prisma adapters)
+## Deferred
 
-- Predicate-**value** extraction into `filters[]` (unlocks `over-fetch`,
-  cardinality, driving-set for these ORMs).
-- Drizzle chained builder + write builders.
-- Full SQL parsing.
+- Drizzle's chained query builder (`db.select()…`) and write builders.
+- Column-level over-fetch (projection / `select`) — row cardinality only.
+- Raw SQL still reads `operation`/`target` with a thin regex (only `WHERE` and
+  JOINs go through the parser); deeper `or`/subquery predicate reasoning is a
+  follow-up.

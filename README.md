@@ -209,12 +209,12 @@ Rule-authoring reference: [`docs/database-knowledge/`](docs/database-knowledge/)
 
 ## Roadmap
 
-Shipped: config file, a real SQL parser, and releases to the **VS Code
-Marketplace**, **Open VSX**, and **npm** (automated on a version tag — see
+Shipped: config file, a real SQL parser, **context-awareness across all adapters**
+(the knowledge file's `over-fetch` / cardinality now work for Drizzle, Mongoose,
+and raw SQL, not just Prisma), and releases to the **VS Code Marketplace**,
+**Open VSX**, and **npm** (automated on a version tag — see
 [`PUBLISHING.md`](PUBLISHING.md)). Next:
 
-- Predicate-value extraction for Drizzle / Mongoose / raw SQL, so `over-fetch`
-  and cardinality work beyond Prisma.
 - More parser-backed SQL rules: subqueries, `HAVING`/`GROUP BY` misuse, `SELECT *`.
 - More engines (MySQL/PlanetScale/Postgres limits) and data layers (TypeORM, Kysely).
 - Deep mode: cross-module data-flow and schema-aware checks.
