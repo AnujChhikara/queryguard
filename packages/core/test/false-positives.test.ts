@@ -31,6 +31,8 @@ const clean: Record<string, string> = {
   "while-poll loop acquiring a lock": `async function r(db){ let locked = false; while (!locked){ locked = await db.query.locks.findFirst(); } }`,
   "capitalized non-model .find with opaque arg (Memory.find)": `async function r(fn, ptr){ return Memory.find(fn(ptr)); }`,
   "GraphQL client .query(document) in a loop": `async function r(client, docs){ for (const d of docs){ await client.query(d, {}); } }`,
+  "typeorm repo.save in a loop (write, not N+1)": `async function r(userRepository, items){ for (const i of items){ await userRepository.save(i); } }`,
+  "typeorm QueryBuilder getOne (single row)": `async function r(repo){ return repo.createQueryBuilder("u").getOne(); }`,
 };
 
 describe("false-positive corpus (must stay clean)", () => {
@@ -60,6 +62,21 @@ describe("true positives still fire (no over-correction)", () => {
   });
 
   it("still warns on an unfiltered mongoose find() (returns many)", () => {
+    const diags = analyzeSource(`async function r(){ return User.find(); }`);
+    expect(diags.some((d) => d.ruleId === "unbounded-read")).toBe(true);
+  });
+
+  it("flags a typeorm repo.find in a loop as an N+1 error", () => {
+    const diags = analyzeSource(`async function r(userRepository, ids){ for (const id of ids){ await userRepository.find({ where: { id } }); } }`);
+    expect(diags.some((d) => d.ruleId === "n-plus-one" && d.severity === "error")).toBe(true);
+  });
+
+  it("warns on an unfiltered typeorm repo.find()", () => {
+    const diags = analyzeSource(`async function r(userRepository){ return userRepository.find(); }`);
+    expect(diags.some((d) => d.ruleId === "unbounded-read")).toBe(true);
+  });
+
+  it("still lets Mongoose handle Model.find() (TypeORM adapter doesn't steal it)", () => {
     const diags = analyzeSource(`async function r(){ return User.find(); }`);
     expect(diags.some((d) => d.ruleId === "unbounded-read")).toBe(true);
   });

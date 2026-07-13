@@ -5,6 +5,7 @@ export * from "./loop.js";
 export * from "./adapters/prisma.js";
 export * from "./adapters/drizzle.js";
 export * from "./adapters/mongoose.js";
+export * from "./adapters/typeorm.js";
 export * from "./adapters/raw-sql.js";
 export * from "./adapters/heuristic.js";
 export * from "./rules/n-plus-one.js";

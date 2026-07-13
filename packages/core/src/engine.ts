@@ -2,6 +2,7 @@ import { parseSource, findQueryCandidates } from "./parse.js";
 import { prismaAdapter } from "./adapters/prisma.js";
 import { drizzleAdapter } from "./adapters/drizzle.js";
 import { mongooseAdapter } from "./adapters/mongoose.js";
+import { typeormAdapter } from "./adapters/typeorm.js";
 import { rawSqlAdapter } from "./adapters/raw-sql.js";
 import { heuristicAdapter } from "./adapters/heuristic.js";
 import { nPlusOneRule } from "./rules/n-plus-one.js";
@@ -22,7 +23,9 @@ import type { Node } from "ts-morph";
 
 // Drizzle before Prisma: `db.query.<table>.findMany` also fits Prisma's
 // `base.model.method` shape, so the more specific `.query.` matcher must win.
-const adapters: Array<(node: Node) => QueryDescriptor | null> = [drizzleAdapter, prismaAdapter, mongooseAdapter, rawSqlAdapter, heuristicAdapter];
+// TypeORM before Mongoose: a capitalized `XxxRepository.find` also looks like a
+// Mongoose model, so the positively-identified TypeORM matcher must win first.
+const adapters: Array<(node: Node) => QueryDescriptor | null> = [drizzleAdapter, prismaAdapter, typeormAdapter, mongooseAdapter, rawSqlAdapter, heuristicAdapter];
 const rules: Rule[] = [
   nPlusOneRule,
   unboundedReadRule,
