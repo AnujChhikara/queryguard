@@ -67,6 +67,8 @@ const AGGREGATE_METHODS = new Set([
   "countDocuments", "estimatedDocumentCount", "aggregate", "distinct",
 ]);
 const ALWAYS_FILTERED = new Set(["findById", "findByIdAndUpdate", "findByIdAndDelete"]);
+// Return at most one document — implicitly bounded, never an unbounded scan.
+const SINGLE_ROW_METHODS = new Set(["findOne", "findById", "findOneAndUpdate", "findOneAndDelete"]);
 
 const ALL_METHODS = new Set([...READ_METHODS, ...WRITE_METHODS, ...DELETE_METHODS]);
 
@@ -139,7 +141,7 @@ export function mongooseAdapter(node: TsNode): QueryDescriptor | null {
     inLoop: isInsideLoop(call),
     awaited: Boolean(call.getFirstAncestor((a) => Node.isAwaitExpression(a))),
     confidence: "high",
-    hasLimit: hasChainedLimit(call),
+    hasLimit: hasChainedLimit(call) || SINGLE_ROW_METHODS.has(method),
     hasFilter,
     // Only reads carry a query filter; writes/deletes pass a document or filter we don't match on.
     filters: operation === "read" ? extractMongooseFilters(firstArg) : [],

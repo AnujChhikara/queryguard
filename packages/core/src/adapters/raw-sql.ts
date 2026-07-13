@@ -43,11 +43,15 @@ function analyzeSql(text: string): SqlFacts | null {
     targetRe = /\bFROM\s+["'`]?(\w+)/i;
   }
 
+  // A SELECT with no FROM (e.g. `SELECT 1`, `SELECT NOW()`) reads computed
+  // values, not a table — it can't be an unbounded scan.
+  const noTableRead = operation === "read" && !/\bFROM\b/i.test(text);
+
   return {
     operation,
     target: targetRe.exec(text)?.[1] ?? "unknown",
     hasFilter: /\bWHERE\b/i.test(text),
-    hasLimit: /\bLIMIT\b/i.test(text),
+    hasLimit: /\bLIMIT\b/i.test(text) || noTableRead,
     isAggregate: operation === "read" && AGGREGATE_FN.test(text),
     sqlFlags: {
       orderByRand: ORDER_BY_RAND.test(text),

@@ -104,7 +104,8 @@ export function drizzleAdapter(node: TsNode): QueryDescriptor | null {
     inLoop: isInsideLoop(call),
     awaited: Boolean(call.getFirstAncestor((a) => Node.isAwaitExpression(a))),
     confidence: "high",
-    hasLimit: hasProp("limit"),
+    // findFirst returns at most one row — an implicit limit.
+    hasLimit: hasProp("limit") || method === "findFirst",
     hasFilter: hasProp("where"),
     filters: extractDrizzleFilters(whereInit),
     isAggregate: false,

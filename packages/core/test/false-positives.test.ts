@@ -16,6 +16,10 @@ const clean: Record<string, string> = {
   "config store.get in a loop": `async function r(store, keys){ for (const k of keys){ await store.get(k); } }`,
   "prisma findFirst (single row, implicit LIMIT 1)": `async function r(){ return prisma.user.findFirst(); }`,
   "prisma findFirstOrThrow (single row)": `async function r(){ return prisma.user.findFirstOrThrow(); }`,
+  "mongoose findOne (single row)": `async function r(){ return User.findOne(); }`,
+  "drizzle findFirst (single row)": `async function r(db){ return db.query.users.findFirst(); }`,
+  "raw SELECT with no table (health check)": "async function r(db){ return db.query(`SELECT 1`); }",
+  "raw SELECT NOW() (no table)": "async function r(db){ return db.query(`SELECT NOW()`); }",
 };
 
 describe("false-positive corpus (must stay clean)", () => {
@@ -37,5 +41,15 @@ describe("true positives still fire (no over-correction)", () => {
   it("flags a db-receiver weak verb in a loop", () => {
     const diags = analyzeSource(`async function r(db, ids){ for (const id of ids){ await db.getUser(id); } }`);
     expect(diags.some((d) => d.ruleId === "n-plus-one")).toBe(true);
+  });
+
+  it("still warns on an unfiltered mongoose find() (returns many)", () => {
+    const diags = analyzeSource(`async function r(){ return User.find(); }`);
+    expect(diags.some((d) => d.ruleId === "unbounded-read")).toBe(true);
+  });
+
+  it("still warns on a raw SELECT scanning a real table", () => {
+    const diags = analyzeSource("async function r(db){ return db.query(`SELECT * FROM users`); }");
+    expect(diags.some((d) => d.ruleId === "unbounded-read")).toBe(true);
   });
 });

@@ -25,7 +25,7 @@ describe("drizzleAdapter", () => {
     expect(d!.awaited).toBe(true);
   });
 
-  it("recognizes findFirst and reports no filter / no limit when absent", () => {
+  it("recognizes findFirst as single-row (implicitly limited), no filter", () => {
     const call = firstCall(
       `async function r(db){ return db.query.posts.findFirst(); }`,
       "db.query.posts.findFirst",
@@ -34,7 +34,8 @@ describe("drizzleAdapter", () => {
     expect(d).not.toBeNull();
     expect(d!.target).toBe("posts");
     expect(d!.hasFilter).toBe(false);
-    expect(d!.hasLimit).toBe(false);
+    // findFirst returns at most one row — an implicit limit, so not unbounded.
+    expect(d!.hasLimit).toBe(true);
   });
 
   it("marks a query inside a loop", () => {
