@@ -3,16 +3,23 @@ import type { Node as TsNode } from "ts-morph";
 import type { QueryDescriptor } from "../types.js";
 import { isInsideLoop } from "../loop.js";
 
-const QUERY_VERBS = new Set([
-  "find", "findone", "findbyid", "findmany", "get", "getby", "retrieve",
-  "fetch", "query", "select", "aggregate", "count", "list", "search",
-  "load", "lookup", "exists",
+// Strong verbs are specific enough to a data read that they match on any
+// receiver (e.g. `User.find(...)`, `repo.query(...)`).
+const STRONG_VERBS = new Set([
+  "find", "findone", "findbyid", "findmany", "findfirst", "findunique",
+  "query", "select", "aggregate", "count", "list", "search",
 ]);
 
+// Weak verbs are ambiguous with everyday JS (`cache.get`, `logger.getLevel`,
+// `store.get`), so they only count as a query when the *receiver* also looks
+// like a data source. This keeps the fallback adapter from crying wolf.
+const WEAK_VERBS = new Set(["get", "fetch", "retrieve", "load", "lookup", "exists"]);
+
+// Only unambiguous data-source identifiers. Deliberately excludes generic names
+// (store, em, model, collection) that are as likely to be Redux/entities/arrays.
 const DATA_SOURCE_NAMES = new Set([
-  "db", "database", "repo", "repository", "model", "models", "dao",
-  "dataaccess", "store", "collection", "knex", "prisma", "mongoose",
-  "sequelize", "em", "entitymanager",
+  "db", "database", "repo", "repository", "dao", "dataaccess", "knex",
+  "prisma", "mongoose", "sequelize", "entitymanager",
 ]);
 
 const BLOCKLIST = new Set([
@@ -21,11 +28,17 @@ const BLOCKLIST = new Set([
   "then", "catch", "finally", "json", "send", "status", "end",
 ]);
 
-function looksLikeQueryVerb(method: string): boolean {
+function verbStrength(method: string): "strong" | "weak" | "none" {
   const m = method.toLowerCase();
-  if (QUERY_VERBS.has(m)) return true;
-  // prefix forms like getById, getAllUserStatus, findByEmail
-  return m.startsWith("get") || m.startsWith("find") || m.startsWith("retrieve") || m.startsWith("fetch");
+  if (STRONG_VERBS.has(m) || m.startsWith("findby") || m.startsWith("findall")) return "strong";
+  if (
+    WEAK_VERBS.has(m) ||
+    m.startsWith("get") || m.startsWith("fetch") ||
+    m.startsWith("retrieve") || m.startsWith("load") || m.startsWith("lookup")
+  ) {
+    return "weak";
+  }
+  return "none";
 }
 
 export function heuristicAdapter(node: TsNode): QueryDescriptor | null {
@@ -42,11 +55,15 @@ export function heuristicAdapter(node: TsNode): QueryDescriptor | null {
   // 4. never match blocklisted methods
   if (BLOCKLIST.has(method.toLowerCase())) return null;
 
-  // 3. method is a query verb OR receiver is a data-source name
-  const receiverText = expr.getExpression().getText();
-  const receiverLeaf = receiverText.split(".").pop() ?? receiverText;
-  const receiverMatches = DATA_SOURCE_NAMES.has(receiverLeaf.toLowerCase());
-  if (!looksLikeQueryVerb(method) && !receiverMatches) return null;
+  // 3. a strong verb matches alone; a weak verb needs a data-source receiver;
+  //    a non-verb (dispatch, flush, save, ...) never matches.
+  const strength = verbStrength(method);
+  if (strength === "none") return null;
+  if (strength === "weak") {
+    const receiverText = expr.getExpression().getText();
+    const receiverLeaf = receiverText.split(".").pop() ?? receiverText;
+    if (!DATA_SOURCE_NAMES.has(receiverLeaf.toLowerCase())) return null;
+  }
 
   return {
     db: "unknown",
