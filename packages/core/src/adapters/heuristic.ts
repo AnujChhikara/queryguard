@@ -8,7 +8,7 @@ import { isInsideLoop } from "../loop.js";
 // ORM-shaped names that rarely collide with non-DB APIs.
 const STRONG_VERBS = new Set([
   "find", "findone", "findbyid", "findmany", "findfirst", "findunique",
-  "query", "aggregate",
+  "aggregate",
 ]);
 
 // Weak verbs are ambiguous with everyday JS and non-DB APIs (`cache.get`,
@@ -17,7 +17,7 @@ const STRONG_VERBS = new Set([
 // looks like a data source. This keeps the fallback adapter from crying wolf.
 const WEAK_VERBS = new Set([
   "get", "fetch", "retrieve", "load", "lookup", "exists",
-  "count", "list", "search", "select",
+  "count", "list", "search", "select", "query",
 ]);
 
 // Only unambiguous data-source identifiers. Deliberately excludes generic names

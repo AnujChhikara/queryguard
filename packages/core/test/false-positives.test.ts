@@ -30,6 +30,7 @@ const clean: Record<string, string> = {
   "retry loop around a query (for attempt <= maxRetries)": `async function r(client, q){ for (let attempt = 1; attempt <= 3; attempt++){ await client.query(q); } }`,
   "while-poll loop acquiring a lock": `async function r(db){ let locked = false; while (!locked){ locked = await db.query.locks.findFirst(); } }`,
   "capitalized non-model .find with opaque arg (Memory.find)": `async function r(fn, ptr){ return Memory.find(fn(ptr)); }`,
+  "GraphQL client .query(document) in a loop": `async function r(client, docs){ for (const d of docs){ await client.query(d, {}); } }`,
 };
 
 describe("false-positive corpus (must stay clean)", () => {
