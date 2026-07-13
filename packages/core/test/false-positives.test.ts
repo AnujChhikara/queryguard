@@ -27,6 +27,9 @@ const clean: Record<string, string> = {
   "API client .list() in a loop": `async function r(client, pages){ for (const p of pages){ await client.events.list(p); } }`,
   "mail fixture .search() in a loop": `async function r(emails, users){ for (const u of users){ await emails.search(u.email); } }`,
   "prisma findMany with opaque args (filter passed as variable)": `async function r(args){ return prisma.user.findMany(args); }`,
+  "retry loop around a query (for attempt <= maxRetries)": `async function r(client, q){ for (let attempt = 1; attempt <= 3; attempt++){ await client.query(q); } }`,
+  "while-poll loop acquiring a lock": `async function r(db){ let locked = false; while (!locked){ locked = await db.query.locks.findFirst(); } }`,
+  "capitalized non-model .find with opaque arg (Memory.find)": `async function r(fn, ptr){ return Memory.find(fn(ptr)); }`,
 };
 
 describe("false-positive corpus (must stay clean)", () => {

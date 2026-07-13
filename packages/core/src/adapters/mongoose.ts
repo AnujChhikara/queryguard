@@ -126,9 +126,13 @@ export function mongooseAdapter(node: TsNode): QueryDescriptor | null {
   const leaf = receiverLeaf(expr.getExpression());
   if (!leaf || !looksLikeModel(leaf)) return null;
 
-  const hasFilter =
-    ALWAYS_FILTERED.has(method) ||
-    Boolean(firstArg && Node.isObjectLiteralExpression(firstArg) && firstArg.getProperties().length > 0);
+  // An opaque first arg (a variable/call we can't read, e.g. Memory.find(fn()))
+  // means the filter is unknown — don't claim it's unfiltered.
+  let hasFilter: boolean | undefined;
+  if (ALWAYS_FILTERED.has(method)) hasFilter = true;
+  else if (!firstArg) hasFilter = false;
+  else if (Node.isObjectLiteralExpression(firstArg)) hasFilter = firstArg.getProperties().length > 0;
+  else hasFilter = undefined;
 
   const operation = operationFor(method);
 
