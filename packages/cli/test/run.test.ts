@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { discoverKnowledge, discoverConfig } from "cardinal-core";
+import { discoverKnowledge, discoverConfig, parsePrismaSchema } from "cardinal-core";
 import { run } from "../src/run.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -48,6 +48,23 @@ describe("run", () => {
       const config = discoverConfig(dir);
       const { diagnostics } = await run(["a.ts"], dir, { config });
       expect(diagnostics.some((d) => d.ruleId === "unbounded-read")).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("run with schema", () => {
+  it("passes a schema through to the engine (unindexed-query fires)", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "cardinal-cli-schema-"));
+    try {
+      writeFileSync(
+        join(dir, "app.ts"),
+        `async function f(prisma){ return prisma.user.findMany({ where: { name: "x" } }); }`,
+      );
+      const schema = parsePrismaSchema("model User {\n  id Int @id\n  name String\n}", join(dir, "schema.prisma"));
+      const { diagnostics } = await run(["app.ts"], dir, { schema });
+      expect(diagnostics.some((d) => d.ruleId === "unindexed-query")).toBe(true);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

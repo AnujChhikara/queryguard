@@ -1,18 +1,22 @@
 #!/usr/bin/env node
-import { discoverKnowledge, loadKnowledge, discoverConfig } from "cardinal-core";
-import type { Knowledge, CardinalConfig } from "cardinal-core";
+import { discoverKnowledge, loadKnowledge, discoverConfig, discoverSchema, loadSchema } from "cardinal-core";
+import type { Knowledge, CardinalConfig, SchemaInfo } from "cardinal-core";
 import { run } from "./run.js";
 
 function parseArgs(argv: string[]): {
   patterns: string[];
   knowledgePath?: string;
   noKnowledge: boolean;
+  schemaPath?: string;
+  noSchema: boolean;
   noConfig: boolean;
   format: "text" | "json";
 } {
   const patterns: string[] = [];
   let knowledgePath: string | undefined;
   let noKnowledge = false;
+  let schemaPath: string | undefined;
+  let noSchema = false;
   let noConfig = false;
   let format: "text" | "json" = "text";
   for (let i = 0; i < argv.length; i++) {
@@ -20,10 +24,12 @@ function parseArgs(argv: string[]): {
     if (a === "--no-knowledge") noKnowledge = true;
     else if (a === "--no-config") noConfig = true;
     else if (a === "--knowledge") knowledgePath = argv[++i];
+    else if (a === "--no-schema") noSchema = true;
+    else if (a === "--schema") schemaPath = argv[++i];
     else if (a === "--format") format = argv[++i] === "json" ? "json" : "text";
     else patterns.push(a);
   }
-  return { patterns, knowledgePath, noKnowledge, noConfig, format };
+  return { patterns, knowledgePath, noKnowledge, schemaPath, noSchema, noConfig, format };
 }
 
 async function main() {
@@ -56,11 +62,11 @@ async function main() {
     process.exit(res.code);
   }
 
-  const { patterns, knowledgePath, noKnowledge, noConfig, format } = parseArgs(argv);
+  const { patterns, knowledgePath, noKnowledge, schemaPath, noSchema, noConfig, format } = parseArgs(argv);
   if (patterns.length === 0) {
     console.error(
       "usage:\n" +
-        "  cardinal [--knowledge <path>] [--no-knowledge] [--no-config] [--format text|json] <glob> [glob...]\n" +
+        "  cardinal [--knowledge <path>] [--no-knowledge] [--schema <path>] [--no-schema] [--no-config] [--format text|json] <glob> [glob...]\n" +
         "  cardinal init [glob...] [--force]     scaffold a cardinal.knowledge.yaml\n" +
         "  cardinal suppress <file>:<line>       silence a finding",
     );
@@ -79,7 +85,13 @@ async function main() {
     if (config) console.error("cardinal: using config from cardinal.config");
   }
 
-  const { diagnostics, errorCount } = await run(patterns, process.cwd(), { knowledge, config });
+  let schema: SchemaInfo | null = null;
+  if (!noSchema) {
+    schema = schemaPath ? loadSchema(schemaPath) : discoverSchema(process.cwd());
+    if (schema) console.error(`cardinal: using schema from ${schema.filePath}`);
+  }
+
+  const { diagnostics, errorCount } = await run(patterns, process.cwd(), { knowledge, config, schema });
 
   if (format === "json") {
     const { formatJson } = await import("./format.js");
