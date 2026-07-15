@@ -44,6 +44,8 @@ export interface QueryDescriptor {
   hasLimit?: boolean;
   hasFilter?: boolean;
   filters?: QueryFilter[];
+  /** Column names from an ORDER BY / orderBy clause, leading column first. */
+  orderByFields?: string[];
   isAggregate?: boolean;
   /** Raw-SQL-only signals consumed by SQL-specific rules. */
   sqlFlags?: SqlFlags;

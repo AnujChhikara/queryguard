@@ -91,3 +91,27 @@ describe("prismaAdapter", () => {
     expect(prismaAdapter(call)!.filters).toEqual([]);
   });
 });
+
+describe("prismaAdapter orderBy extraction", () => {
+  function one(code: string) {
+    const sf = parseSource(code);
+    const d = findCallExpressions(sf).map((c) => prismaAdapter(c)).find((x) => x !== null);
+    expect(d).toBeTruthy();
+    return d!;
+  }
+
+  it("extracts a single-field orderBy", () => {
+    const d = one(`async function f(prisma){ return prisma.user.findMany({ orderBy: { createdAt: "desc" } }); }`);
+    expect(d.orderByFields).toEqual(["createdAt"]);
+  });
+
+  it("extracts array-form orderBy preserving order", () => {
+    const d = one(`async function f(prisma){ return prisma.user.findMany({ orderBy: [{ name: "asc" }, { id: "desc" }] }); }`);
+    expect(d.orderByFields).toEqual(["name", "id"]);
+  });
+
+  it("leaves orderByFields undefined when absent or opaque", () => {
+    expect(one(`async function f(prisma){ return prisma.user.findMany({}); }`).orderByFields).toBeUndefined();
+    expect(one(`async function f(prisma, ob){ return prisma.user.findMany({ orderBy: ob }); }`).orderByFields).toBeUndefined();
+  });
+});
