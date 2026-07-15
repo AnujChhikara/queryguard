@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { analyzeSource, collectQueries } from "../src/engine.js";
 import { parseKnowledge } from "../src/knowledge/load.js";
 import { parseConfig } from "../src/config.js";
+import { parsePrismaSchema } from "../src/schema/prisma.js";
 
 describe("collectQueries", () => {
   it("returns query descriptors across every adapter", () => {
@@ -237,5 +238,28 @@ tables:
       knowledge,
     );
     expect(diags.filter((d) => d.ruleId === "n-plus-one")).toHaveLength(0);
+  });
+});
+
+describe("analyzeSource with schema", () => {
+  const schema = parsePrismaSchema("model User {\n  id Int @id\n  name String\n}", "/p/schema.prisma");
+
+  it("reports unindexed-query when a schema is provided", () => {
+    const diags = analyzeSource(
+      `async function f(prisma){ return prisma.user.findMany({ where: { name: "x" } }); }`,
+      "f.ts",
+      null,
+      null,
+      schema,
+    );
+    expect(diags.some((d) => d.ruleId === "unindexed-query")).toBe(true);
+  });
+
+  it("is unchanged without a schema", () => {
+    const diags = analyzeSource(
+      `async function f(prisma){ return prisma.user.findMany({ where: { name: "x" } }); }`,
+      "f.ts",
+    );
+    expect(diags.some((d) => d.ruleId === "unindexed-query")).toBe(false);
   });
 });
