@@ -12,12 +12,13 @@ ESLint, but specialized for the data layer. 100% static: no LLM, no network, no
 database connection; your code never leaves your machine.
 
 > **Status:** early. Today Cardinal ships a core engine, a CLI, and a VS Code
-> extension with six rules (`n-plus-one`, `unbounded-read`, `over-fetch`,
-> `order-by-rand`, `leading-wildcard-like`, `excessive-joins`), adapters for
-> **Prisma, Drizzle, Mongoose, TypeORM, and raw SQL** (the last parsed with a
-> real SQL parser), an optional **knowledge file** that makes the rules
-> scale-aware, and a **config file** to tune them. See [Roadmap](#roadmap) for
-> what's next.
+> extension with seven rules (`n-plus-one`, `unbounded-read`, `over-fetch`,
+> `order-by-rand`, `leading-wildcard-like`, `excessive-joins`,
+> `unindexed-query`), adapters for **Prisma, Drizzle, Mongoose, TypeORM, and
+> raw SQL** (the last parsed with a real SQL parser), **schema-awareness**
+> (indexes read straight from your `schema.prisma`), an optional **knowledge
+> file** that makes the rules scale-aware, and a **config file** to tune them.
+> See [Roadmap](#roadmap) for what's next.
 
 ## What's here
 
@@ -165,6 +166,21 @@ index. **warning**.
 A query joining many tables (JOINs counted by a real SQL parser). Large join
 fan-out is hard on the planner. **warning**.
 
+### unindexed-query
+A query filtering or sorting on a column no index covers — the database scans
+(or sorts) the whole table. Cardinal reads the indexes straight from your
+**`schema.prisma`** (`@id`, `@unique`, `@@index`, `@@unique` — compound
+leading-column aware), discovered automatically by walking up from the current
+directory like the knowledge file. Override with `--schema <path>`, disable
+with `--no-schema`. A knowledge file marking the table small silences it.
+**warning** (Prisma today; more ORMs next).
+
+```
+app.ts:2:10  warning  unindexed-query  Query on "user" filters on "name", but no
+index has it as its leading column — the database scans the whole table. Add
+`@@index([name])` in schema.prisma.
+```
+
 ## Business-logic context
 
 Structural rules see *shape*, not *scale* — a query in a loop looks like an N+1
@@ -260,13 +276,15 @@ Rule-authoring reference: [`docs/database-knowledge/`](docs/database-knowledge/)
 Shipped: config file, a real SQL parser, **context-awareness across all adapters**
 (the knowledge file's `over-fetch` / cardinality now work for Drizzle, Mongoose,
 and raw SQL, not just Prisma), **machine-readable `--format json`** output (each
-finding carries a why/fix explanation, so an AI agent can apply the fix), and
-releases to the **VS Code Marketplace**, **Open VSX**, and **npm** (automated on
-a version tag — see [`PUBLISHING.md`](PUBLISHING.md)). Next:
+finding carries a why/fix explanation, so an AI agent can apply the fix),
+**schema-awareness for Prisma** (`unindexed-query` reads indexes from
+`schema.prisma`), and releases to the **VS Code Marketplace**, **Open VSX**, and
+**npm** (automated on a version tag — see [`PUBLISHING.md`](PUBLISHING.md)). Next:
 
+- Index extraction for Drizzle, TypeORM, and Mongoose schemas (`unindexed-query` beyond Prisma).
 - More parser-backed SQL rules: subqueries, `HAVING`/`GROUP BY` misuse, `SELECT *`.
 - More engines (MySQL/PlanetScale/Postgres limits) and data layers (Kysely, Sequelize).
-- Deep mode: cross-module data-flow and schema-aware checks.
+- Deep mode: cross-module data-flow checks.
 
 ## License
 

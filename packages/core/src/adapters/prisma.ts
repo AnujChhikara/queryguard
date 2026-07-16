@@ -49,17 +49,18 @@ function readOptions(call: CallExpression): {
   hasFilter: boolean | undefined;
   selectedFields: string[];
   filters: QueryFilter[];
+  orderByFields: string[] | undefined;
 } {
   const [firstArg] = call.getArguments();
   // No argument at all — genuinely unfiltered and unlimited.
   if (!firstArg) {
-    return { hasLimit: false, hasFilter: false, selectedFields: [], filters: [] };
+    return { hasLimit: false, hasFilter: false, selectedFields: [], filters: [], orderByFields: undefined };
   }
   // An opaque argument (a variable/spread we can't read statically, e.g.
   // findMany(args)) — we don't know if it filters/limits, so report unknown
   // rather than falsely claiming an unbounded scan.
   if (!Node.isObjectLiteralExpression(firstArg)) {
-    return { hasLimit: undefined, hasFilter: undefined, selectedFields: [], filters: [] };
+    return { hasLimit: undefined, hasFilter: undefined, selectedFields: [], filters: [], orderByFields: undefined };
   }
   const hasProp = (name: string) => Boolean(firstArg.getProperty(name));
   const selectProp = firstArg.getProperty("select");
@@ -76,11 +77,25 @@ function readOptions(call: CallExpression): {
   const whereProp = firstArg.getProperty("where");
   const whereInit =
     whereProp && Node.isPropertyAssignment(whereProp) ? whereProp.getInitializer() : undefined;
+  const orderByProp = firstArg.getProperty("orderBy");
+  let orderByFields: string[] | undefined;
+  if (orderByProp && Node.isPropertyAssignment(orderByProp)) {
+    const init = orderByProp.getInitializer();
+    if (init && Node.isObjectLiteralExpression(init)) {
+      orderByFields = init.getProperties().filter(Node.isPropertyAssignment).map((p) => p.getName());
+    } else if (init && Node.isArrayLiteralExpression(init)) {
+      orderByFields = init
+        .getElements()
+        .filter(Node.isObjectLiteralExpression)
+        .flatMap((el) => el.getProperties().filter(Node.isPropertyAssignment).map((p) => p.getName()));
+    }
+  }
   return {
     hasLimit: hasProp("take"),
     hasFilter: hasProp("where"),
     selectedFields,
     filters: extractFilters(whereInit),
+    orderByFields,
   };
 }
 
@@ -119,6 +134,7 @@ export function prismaAdapter(node: TsNode): QueryDescriptor | null {
     hasFilter: options.hasFilter,
     selectedFields: options.selectedFields,
     filters: options.filters,
+    orderByFields: options.orderByFields,
     isAggregate: AGGREGATE_METHODS.has(method),
   };
 }

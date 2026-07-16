@@ -31,6 +31,10 @@ export const ruleExplanations: Record<string, RuleExplanation> = {
     why: "LIKE '%…' has a leading wildcard, so the database can't use a B-tree index on the column and falls back to a full scan.",
     fix: "Anchor the pattern to the start ('abc%') so an index can be used, or move substring search to a full-text or trigram (GIN) index.",
   },
+  "unindexed-query": {
+    why: "A filter or sort on a column no index covers can't use an index seek — the database reads (or sorts) every row in the table, so latency grows linearly with table size. For a compound index, only queries constraining its leading column can use it.",
+    fix: "Add an index whose leading column is the filtered/sorted field (Prisma: `@@index([field])` in schema.prisma), or filter on an already-indexed column.",
+  },
   "excessive-joins": {
     why: "Joining many tables in one query enlarges the query planner's search space and can multiply intermediate row counts, making the query slow and hard to plan.",
     fix: "Reduce the join fan-out: split into smaller queries, denormalize a hot read path, or fetch related data in separate batched queries.",

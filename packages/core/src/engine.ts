@@ -11,6 +11,7 @@ import { overFetchRule } from "./rules/over-fetch.js";
 import { orderByRandRule } from "./rules/order-by-rand.js";
 import { leadingWildcardLikeRule } from "./rules/leading-wildcard-like.js";
 import { excessiveJoinsRule } from "./rules/excessive-joins.js";
+import { unindexedQueryRule } from "./rules/unindexed-query.js";
 import { estimateCardinality } from "./knowledge/cardinality.js";
 import { resolveDrivingSet } from "./knowledge/driving-set.js";
 import { readInlineHint } from "./knowledge/hints.js";
@@ -18,6 +19,7 @@ import { filterSuppressed } from "./knowledge/suppress.js";
 import { applyConfig } from "./config.js";
 import type { CardinalConfig } from "./config.js";
 import type { Knowledge, Cardinality } from "./knowledge/types.js";
+import type { SchemaInfo } from "./schema/types.js";
 import type { Diagnostic, QueryDescriptor, Rule } from "./types.js";
 import type { Node } from "ts-morph";
 
@@ -33,6 +35,7 @@ const rules: Rule[] = [
   orderByRandRule,
   leadingWildcardLikeRule,
   excessiveJoinsRule,
+  unindexedQueryRule,
 ];
 
 /** Every query Cardinal recognizes in a source string (first matching adapter wins). */
@@ -56,6 +59,7 @@ export function analyzeSource(
   filePath?: string,
   knowledge?: Knowledge | null,
   config?: CardinalConfig | null,
+  schema?: SchemaInfo | null,
 ): Diagnostic[] {
   const descriptors = collectQueries(code, filePath);
 
@@ -85,7 +89,7 @@ export function analyzeSource(
     return c;
   };
 
-  const ctx = { descriptors, knowledge, cardinalityOf, loopBoundOf };
+  const ctx = { descriptors, knowledge, schema, cardinalityOf, loopBoundOf };
 
   const diagnostics: Diagnostic[] = [];
   for (const rule of rules) {
