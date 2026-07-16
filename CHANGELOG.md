@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- **feat(core):** `unindexed-query` rule — flags queries filtering/sorting on
+  columns no index covers, using indexes parsed from `schema.prisma`
+  (`@id`/`@unique`/`@@index`/`@@unique`, compound leading-column aware). Silent
+  for relation filters, `AND`/`OR`/`NOT` composites, unknown models, and tables
+  the knowledge file marks small.
+- **feat(cli):** auto-discovers `prisma/schema.prisma`; new `--schema <path>`
+  and `--no-schema` flags.
+- **feat(vscode):** live `unindexed-query` diagnostics; re-lints when a
+  `schema.prisma` changes.
+
 ## 0.1.0 — 2026-07-12
 
 First release.
