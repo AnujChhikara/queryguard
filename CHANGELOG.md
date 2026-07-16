@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.3 — 2026-07-16
 
 - **feat(core):** `unindexed-query` rule — flags queries filtering/sorting on
   columns no index covers, using indexes parsed from `schema.prisma`
