@@ -3,6 +3,7 @@ import { dirname } from "node:path";
 import { toVsDiagnostics, type MappedDiagnostic } from "./analyze.js";
 import { KnowledgeCache } from "./knowledge-cache.js";
 import { ConfigCache } from "./config-cache.js";
+import { SchemaCache } from "./schema-cache.js";
 import { performSuppression, type SuppressIO } from "./suppress-action.js";
 
 const TARGET_LANGUAGES = new Set([
@@ -66,6 +67,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const timers = new Map<string, ReturnType<typeof setTimeout>>();
   const knowledgeCache = new KnowledgeCache();
   const configCache = new ConfigCache();
+  const schemaCache = new SchemaCache();
 
   function analyzeDocument(doc: vscode.TextDocument): void {
     if (!TARGET_LANGUAGES.has(doc.languageId)) return;
@@ -74,7 +76,8 @@ export function activate(context: vscode.ExtensionContext): void {
     const dir = dirname(doc.fileName);
     const knowledge = knowledgeEnabled() ? knowledgeCache.get(dir) : null;
     const config = configCache.get(dir);
-    const mapped = toVsDiagnostics(doc.getText(), doc.fileName, knowledge, config);
+    const schema = schemaCache.get(dir);
+    const mapped = toVsDiagnostics(doc.getText(), doc.fileName, knowledge, config, schema);
     const diags = mapped.map((m) => {
       const range = new vscode.Range(
         doc.positionAt(m.startOffset),
@@ -106,6 +109,7 @@ export function activate(context: vscode.ExtensionContext): void {
   function refreshKnowledge(): void {
     knowledgeCache.clear();
     configCache.clear();
+    schemaCache.clear();
     for (const doc of vscode.workspace.textDocuments) analyzeDocument(doc);
   }
 
@@ -115,7 +119,8 @@ export function activate(context: vscode.ExtensionContext): void {
   const configWatcher = vscode.workspace.createFileSystemWatcher(
     "**/cardinal.config.{json,yaml,yml}",
   );
-  for (const w of [knowledgeWatcher, configWatcher]) {
+  const schemaWatcher = vscode.workspace.createFileSystemWatcher("**/schema.prisma");
+  for (const w of [knowledgeWatcher, configWatcher, schemaWatcher]) {
     w.onDidChange(refreshKnowledge);
     w.onDidCreate(refreshKnowledge);
     w.onDidDelete(refreshKnowledge);
