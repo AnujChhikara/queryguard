@@ -2,23 +2,33 @@
 const rules = [
   {
     id: "n-plus-one",
+    sev: "error",
     title: "N+1 loops",
-    body: "A query inside a loop runs once per row, so 100 rows is 101 round trips. Cardinal points you at the single batched query - and with a knowledge file it stays quiet on the loops that are provably small.",
+    body: "A query inside a loop runs once per row: 100 rows is 101 round trips, and 10,000 rows is an incident. Cardinal points at the single batched query that replaces the loop - and stays quiet when it can prove the loop is small.",
+  },
+  {
+    id: "unindexed-query",
+    sev: "warning",
+    title: "Queries no index covers",
+    body: "Cardinal reads the indexes in your schema.prisma - zero setup. Filter or sort on a column no index covers and it hands you the exact @@index([...]) to add, before the table scan finds you in production.",
   },
   {
     id: "unbounded-read",
+    sev: "warning",
     title: "Unbounded reads",
-    body: "A read with no WHERE and no LIMIT scans the whole table. Flagged before it grows from fast in dev to a full-table load under real traffic.",
+    body: "No WHERE, no LIMIT - the whole table comes back. Fast with 200 dev rows, a memory spike with 2 million real ones. Flagged the moment you type it.",
   },
   {
     id: "over-fetch",
+    sev: "warning",
     title: "Over-fetching",
-    body: "Pulling an entire large table when a small subset would do. Cardinal suggests the narrower read from facts you declare about your data.",
+    body: "Loading 10,000 rows to use 10. Tell Cardinal your table sizes once, and it names the narrower read - down to the exact filter that returns the small subset.",
   },
   {
     id: "raw SQL",
+    sev: "warning",
     title: "Slow SQL patterns",
-    body: "ORDER BY RAND(), leading-wildcard LIKE, and over-joined queries - the raw-SQL smells that skip the index, parsed and flagged like everything else.",
+    body: "ORDER BY RAND(), LIKE '%…', six-table joins - the classics that skip every index. Parsed with a real SQL parser, flagged like everything else.",
   },
 ];
 ---
@@ -26,12 +36,12 @@ const rules = [
 <section class="features" id="what">
   <div class="container">
     <p class="eyebrow" data-reveal>What it catches</p>
-    <h2 class="title" data-reveal>The mistakes your ORM makes easy to write.</h2>
+    <h2 class="title" data-reveal>One innocent line. One melted database.</h2>
     <div class="rows">
       {
-        rules.map((r, i) => (
+        rules.map((r) => (
           <article class="row" data-reveal>
-            <span class="idx">{String(i + 1).padStart(2, "0")}</span>
+            <span class={`sevtag sevtag--${r.sev}`}>{r.sev}</span>
             <div class="rule-body">
               <h3>{r.title}</h3>
               <code class="tag">{r.id}</code>
@@ -45,11 +55,11 @@ const rules = [
     <div class="promises">
       <div class="promise" data-reveal>
         <h4>Database-aware</h4>
-        <p>Not a generic linter - it reads query shape, cardinality, and the real cost of a round trip.</p>
+        <p>Not a style linter - it reads query shape, index coverage, and the real cost of a round trip.</p>
       </div>
       <div class="promise" data-reveal>
         <h4>100% static</h4>
-        <p>No LLM, no network, no database connection. Analysis runs entirely on your machine.</p>
+        <p>No LLM, no network, no database connection. Cardinal never sees your data - only your code, on your machine.</p>
       </div>
     </div>
   </div>
@@ -71,7 +81,7 @@ const rules = [
   }
   .row {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 5.2rem 1fr;
     gap: clamp(1rem, 4vw, 3rem);
     padding-block: 2rem;
     border-top: 1px solid var(--grid);
@@ -79,11 +89,27 @@ const rules = [
   .row:first-child {
     border-top: 0;
   }
-  .idx {
+  /* Severity is the real taxonomy of the rule list — high-confidence checks
+     are errors, inferred ones are warnings. */
+  .sevtag {
+    justify-self: start;
+    align-self: start;
+    margin-top: 0.55rem;
     font-family: var(--font-mono);
-    font-size: 0.9rem;
-    color: var(--muted);
-    padding-top: 0.35rem;
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25em 0.55em;
+    border-radius: 4px;
+  }
+  .sevtag--error {
+    background: #f0dede;
+    color: var(--red);
+  }
+  .sevtag--warning {
+    background: var(--marker);
+    color: var(--ink);
   }
   .rule-body h3 {
     font-size: clamp(1.5rem, 3vw, 2rem);
@@ -94,7 +120,9 @@ const rules = [
     margin-left: 0.7rem;
     font-family: var(--font-mono);
     font-size: 0.74rem;
-    background: var(--marker);
+    color: var(--muted);
+    border: 1px solid var(--grid);
+    background: transparent;
     padding: 0.15em 0.5em;
     border-radius: 4px;
     vertical-align: middle;
@@ -132,6 +160,13 @@ const rules = [
   @media (max-width: 680px) {
     .promises {
       grid-template-columns: 1fr;
+    }
+    .row {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
+    .sevtag {
+      margin-top: 0;
     }
   }
 </style>

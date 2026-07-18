@@ -1,5 +1,6 @@
 ---
 const repo = "https://github.com/AnujChhikara/cardinal";
+const marketplace = "https://marketplace.visualstudio.com/items?itemName=anujchhikara.cardinal-vscode";
 const creator = "https://anujchhikara.com";
 ---
 
@@ -7,10 +8,13 @@ const creator = "https://anujchhikara.com";
   <div class="container inner">
     <div class="cta">
       <h2>Stop shipping the 10,000-query loop.</h2>
-      <a class="btn btn--primary" href={repo}>
-        View on GitHub
-        <span aria-hidden="true">→</span>
-      </a>
+      <div class="cta-actions">
+        <a class="btn btn--primary" href={marketplace}>
+          Install for VS&nbsp;Code
+          <span aria-hidden="true">→</span>
+        </a>
+        <a class="btn btn--ghost" href={repo}>View on GitHub</a>
+      </div>
     </div>
     <div class="fine">
       <span class="mono">Cardinal</span>
@@ -51,6 +55,20 @@ const creator = "https://anujchhikara.com";
   .footer .btn--primary:hover {
     background: var(--paper);
     border-color: var(--paper);
+  }
+  .cta-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+  }
+  .footer .btn--ghost {
+    border-color: var(--paper);
+    color: var(--paper);
+  }
+  .footer .btn--ghost:hover {
+    background: var(--paper);
+    color: var(--ink);
   }
   .fine {
     display: flex;

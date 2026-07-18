@@ -19,9 +19,9 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
         <span class="mark">10,000 times</span>.
       </h1>
       <p class="sub" data-hero-item>
-        The slow queries you'd catch in code review - N+1 loops, unbounded reads,
-        over-fetching - caught automatically as you type. 100% static: no LLM, no
-        database connection.
+        Cardinal flags the queries that melt under production data - N+1 loops,
+        full-table scans, filters no index covers - as you type, not in the
+        postmortem. No LLM, no network. Your code never leaves your machine.
       </p>
       <div class="actions" data-hero-item>
         <a class="btn btn--primary" href={marketplace}>
@@ -58,10 +58,17 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
           <span class="file">users.service.ts</span>
         </figcaption>
         <pre class="code"><code set:html={codeHtml} /></pre>
-        <div class="diag">
-          <span class="sev">error</span>
-          <span class="rule">n-plus-one</span>
-          <span class="msg">Query on “post” runs once per user - batch it into one query.</span>
+        <div class="diags">
+          <div class="diag">
+            <span class="sev">error</span>
+            <span class="rule">n-plus-one</span>
+            <span class="msg">Query on “post” runs once per user - batch it into one query.</span>
+          </div>
+          <div class="diag">
+            <span class="sev sev--warn">warning</span>
+            <span class="rule">unindexed-query</span>
+            <span class="msg">No index covers “authorId” - add <code>@@index([authorId])</code>.</span>
+          </div>
         </div>
       </figure>
     </div>
@@ -238,13 +245,16 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
     text-decoration-thickness: 2px;
     text-underline-offset: 4px;
   }
+  .diags {
+    border-top: 1px solid #262625;
+    padding: 0.55rem 0 0.75rem;
+  }
   .diag {
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;
     gap: 0.5rem 0.7rem;
-    padding: 0.95rem 1.25rem 1.15rem;
-    border-top: 1px solid #262625;
+    padding: 0.4rem 1.25rem;
     font-family: var(--font-mono);
     font-size: 0.76rem;
   }
@@ -254,8 +264,14 @@ const codeHtml = `<span class="ln"> </span><span class="kw">const</span> users =
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
-  .rule {
+  .sev--warn {
     color: var(--marker);
+  }
+  .msg code {
+    color: #f4f4f0;
+  }
+  .rule {
+    color: #b9b9b3;
   }
   .msg {
     color: #b7b7b1;
