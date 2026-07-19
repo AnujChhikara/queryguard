@@ -40,3 +40,15 @@ describe("suppressCommand", () => {
     expect(k.suppressions[0].reason).toBe("typed reason");
   });
 });
+
+describe("suppressCommand report link", () => {
+  it("returns a pre-filled report URL on success", async () => {
+    dir = mkdtempSync(join(tmpdir(), "qg-report-"));
+    writeFileSync(join(dir, "a.ts"), `async function r(prisma, ids){\n  for (const id of ids){ await prisma.post.findMany({ where: { authorId: id } }); }\n}`);
+    const res = await suppressCommand("a.ts:2", dir, { reason: "capped list", acceptFact: false }, async () => "");
+    expect(res.code).toBe(0);
+    expect(res.reportUrl).toContain("issues/new");
+    expect(res.reportUrl).toContain("template=false-positive.yml");
+    expect(res.reportUrl).toContain("n-plus-one");
+  });
+});

@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join, isAbsolute } from "node:path";
-import { buildSuppressPlan, addSuppression, addFact, discoverKnowledge, loadKnowledge } from "cardinal-core";
+import { buildSuppressPlan, addSuppression, addFact, discoverKnowledge, loadKnowledge, buildReportUrl } from "cardinal-core";
 import type { Knowledge } from "cardinal-core";
 
 export interface SuppressOptions {
@@ -17,7 +17,7 @@ export async function suppressCommand(
   cwd: string,
   opts: SuppressOptions,
   ask: (q: string) => Promise<string>,
-): Promise<{ code: number; message: string }> {
+): Promise<{ code: number; message: string; reportUrl?: string }> {
   const m = /^(.*):(\d+)$/.exec(target);
   if (!m) return { code: 1, message: `invalid target "${target}" — expected <file>:<line>` };
   const relFile = m[1];
@@ -55,5 +55,10 @@ export async function suppressCommand(
     }
   }
 
-  return { code: 0, message: `suppressed ${suppression.rule} at ${relFile}:${line}${factMsg}` };
+  const reportUrl = buildReportUrl({ rule: suppression.rule, anchor: suppression.anchor });
+  return {
+    code: 0,
+    message: `suppressed ${suppression.rule} at ${relFile}:${line}${factMsg}`,
+    reportUrl,
+  };
 }
