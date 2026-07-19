@@ -2,7 +2,7 @@
   "name": "cardinal-vscode",
   "displayName": "Cardinal",
   "description": "A database-aware linter for TypeScript/JavaScript. Flags N+1 loops, unbounded reads, and over-fetching as you type — 100% static.",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "publisher": "anujchhikara",
   "license": "MIT",
   "icon": "icon.png",

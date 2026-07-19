@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.4 — 2026-07-19
+
+- **feat(core):** `buildReportUrl` — builds a pre-filled GitHub issue link for
+  reporting a false positive (rule, query snippet, message), URL-safe and
+  length-capped. Nothing is ever sent automatically.
+- **feat(cli):** after `cardinal suppress`, print a pre-filled "report this
+  false positive" link to stderr.
+- **feat(vscode):** the suppress toast gains a "Report as false positive"
+  button that opens the pre-filled issue.
+- **docs:** GitHub issue templates (false positive / missed catch / crash) and
+  a `test/corpus/` convention — every confirmed report becomes a permanent
+  regression test.
+
 ## 0.1.3 — 2026-07-16
 
 - **feat(core):** `unindexed-query` rule — flags queries filtering/sorting on
