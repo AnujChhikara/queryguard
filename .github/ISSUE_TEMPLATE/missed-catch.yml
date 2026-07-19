@@ -1,0 +1,28 @@
+name: Missed catch
+description: This query is slow — Cardinal stayed quiet.
+title: "[missed-catch] "
+labels: ["missed-catch", "corpus-candidate"]
+body:
+  - type: textarea
+    id: snippet
+    attributes:
+      label: The slow query code
+      render: ts
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should have been flagged, and why?
+    validations:
+      required: true
+  - type: input
+    id: orm
+    attributes:
+      label: ORM / adapter
+      placeholder: Prisma, Drizzle, Mongoose, TypeORM, raw SQL
+  - type: input
+    id: version
+    attributes:
+      label: Cardinal version
+      placeholder: cardinal-cli 0.1.3

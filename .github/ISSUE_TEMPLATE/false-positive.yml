@@ -1,0 +1,44 @@
+name: False positive
+description: Cardinal flagged this, but it's fine.
+title: "[false-positive] "
+labels: ["false-positive", "corpus-candidate"]
+body:
+  - type: dropdown
+    id: rule
+    attributes:
+      label: Rule
+      options:
+        - n-plus-one
+        - unindexed-query
+        - unbounded-read
+        - over-fetch
+        - order-by-rand
+        - leading-wildcard-like
+        - excessive-joins
+    validations:
+      required: true
+  - type: textarea
+    id: snippet
+    attributes:
+      label: The flagged code
+      description: The query call Cardinal flagged (minimal is fine).
+      render: ts
+    validations:
+      required: true
+  - type: input
+    id: message
+    attributes:
+      label: Diagnostic message
+      description: What Cardinal said.
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is this fine?
+      description: e.g. the list is capped at 20, the loop is admin-only…
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Cardinal version + adapter
+      placeholder: cardinal-cli 0.1.3, Prisma

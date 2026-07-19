@@ -59,6 +59,9 @@ async function main() {
     );
     rl.close();
     console.log(res.message);
+    if (res.reportUrl) {
+      console.error(`\nThink Cardinal got this wrong? Report it (pre-filled): ${res.reportUrl}`);
+    }
     process.exit(res.code);
   }
 

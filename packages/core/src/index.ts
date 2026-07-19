@@ -28,3 +28,4 @@ export * from "./knowledge/store.js";
 export * from "./knowledge/scaffold.js";
 export * from "./schema/prisma.js";
 export * from "./schema/discover.js";
+export * from "./report.js";

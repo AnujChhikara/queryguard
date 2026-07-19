@@ -1,0 +1,29 @@
+name: Crash / error
+description: The CLI or extension errored.
+title: "[crash] "
+labels: ["crash"]
+body:
+  - type: input
+    id: command
+    attributes:
+      label: What did you run?
+      placeholder: npx cardinal "src/**/*.ts"
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Error output
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: snippet
+    attributes:
+      label: Minimal code that triggers it (if known)
+      render: ts
+  - type: input
+    id: version
+    attributes:
+      label: Cardinal version
+      placeholder: cardinal-cli 0.1.3

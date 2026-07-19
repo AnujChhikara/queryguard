@@ -235,6 +235,17 @@ call). Run it without `--reason` for an interactive prompt. In the VS Code
 extension the same flow is a lightbulb quick-fix on any Cardinal squiggle. Full details:
 [`docs/database-knowledge/business-logic-context.md`](docs/database-knowledge/business-logic-context.md).
 
+### Reporting a wrong finding
+
+Cardinal is tuned by real codebases. If a finding is wrong — a false positive,
+a missed catch, or a crash — report it with one of the
+[issue templates](https://github.com/AnujChhikara/cardinal/issues/new/choose).
+After `cardinal suppress` (or the VS Code suppress quick-fix) Cardinal offers a
+**pre-filled report link** — review it on GitHub and press Create; nothing is
+ever sent automatically. Every confirmed report ships as a permanent regression
+test in [`packages/core/test/corpus/`](packages/core/test/corpus/), so a fixed
+false positive can never come back.
+
 ## Configuration
 
 Drop a **`cardinal.config.json`** (or `.yaml`) in your project to turn rules off

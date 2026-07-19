@@ -92,3 +92,19 @@ describe("performSuppression", () => {
     expect(k.suppressions).toHaveLength(1);
   });
 });
+
+describe("performSuppression report link", () => {
+  it("returns a pre-filled report URL on success", async () => {
+    const { abs } = setup();
+    const res = await performSuppression(
+      { code: NPLUS1, absPath: abs, relPath: "svc.ts", line: 2, ruleId: "n-plus-one", workspaceRoot: dir },
+      { askReason: async () => "bounded", confirmFact: no },
+    );
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.reportUrl).toContain("issues/new");
+      expect(res.reportUrl).toContain("template=false-positive.yml");
+      expect(res.reportUrl).toContain("n-plus-one");
+    }
+  });
+});
