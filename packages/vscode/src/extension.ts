@@ -159,7 +159,13 @@ export function activate(context: vscode.ExtensionContext): void {
     );
     if (res.ok) {
       refreshKnowledge();
-      void vscode.window.showInformationMessage(`Cardinal: ${res.message}`);
+      const pick = await vscode.window.showInformationMessage(
+        `Cardinal: ${res.message}`,
+        "Report as false positive",
+      );
+      if (pick === "Report as false positive") {
+        void vscode.env.openExternal(vscode.Uri.parse(res.reportUrl));
+      }
     } else if (res.error !== "cancelled") {
       void vscode.window.showWarningMessage(`Cardinal: ${res.error}`);
     }

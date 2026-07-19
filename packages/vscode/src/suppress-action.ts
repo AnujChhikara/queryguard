@@ -5,6 +5,7 @@ import {
   buildSuppressPlan,
   addSuppression,
   addFact,
+  buildReportUrl,
   type Knowledge,
 } from "cardinal-core";
 
@@ -31,7 +32,7 @@ export interface SuppressParams {
 }
 
 export type SuppressResult =
-  | { ok: true; message: string; knowledgeFile: string }
+  | { ok: true; message: string; knowledgeFile: string; reportUrl: string }
   | { ok: false; error: string };
 
 /**
@@ -88,5 +89,6 @@ export async function performSuppression(
     ok: true,
     message: `Suppressed ${plan.suppression.rule} at ${relPath}:${line}${factMsg}`,
     knowledgeFile,
+    reportUrl: buildReportUrl({ rule: plan.suppression.rule, anchor: plan.suppression.anchor }),
   };
 }
